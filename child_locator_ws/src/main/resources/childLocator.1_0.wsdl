@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<definitions
+	xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+	xmlns:wsp="http://www.w3.org/ns/ws-policy" xmlns:wsp1_2="http://schemas.xmlsoap.org/ws/2004/09/policy"
+	xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:tns="http://ws.child_locator.sirs.ist.com/" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	xmlns="http://schemas.xmlsoap.org/wsdl/" targetNamespace="http://ws.child_locator.sirs.ist.com/"
+	name="ChildLocatorService">
+
+	<types>
+		<!-- <xsd:schema> -->
+		<!-- <xsd:import namespace="http://ws.child_locator.sirs.ist.com/" -->
+		<!-- schemaLocation="http://localhost:19287/server?xsd=1" /> -->
+
+		<xs:schema xmlns:tns="http://ws.child_locator.sirs.ist.com/"
+			xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
+			targetNamespace="http://ws.child_locator.sirs.ist.com/">
+			<xs:element name="print" type="tns:print" />
+			<xs:element name="printResponse" type="tns:printResponse" />
+			<xs:complexType name="print">
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name="printResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+		</xs:schema>
+
+
+		<!-- </xsd:schema> -->
+	</types>
+	<message name="print">
+		<!-- <part name="parameters" element="tns:print" /> -->
+		<part name="print" element="tns:print" />
+	</message>
+	<message name="printResponse">
+		<!-- <part name="parameters" element="tns:printResponse" /> -->
+		<part name="printResponse" element="tns:printResponse" />
+	</message>
+
+
+	<portType name="ChildLocatorPortType">
+		<operation name="print">
+			<!-- <input wsam:Action="http://ws.child_locator.sirs.ist.com/Server/printRequest" -->
+			<!-- message="tns:print" /> -->
+			<!-- <output wsam:Action="http://ws.child_locator.sirs.ist.com/Server/printResponse" -->
+			<!-- message="tns:printResponse" /> -->
+			<input name="print"	message="tns:print" />
+			<output name="printResponse" message="tns:printResponse" />
+		</operation>
+	</portType>
+	
+	
+	<binding name="ChildLocatorBinding" type="tns:ChildLocatorPortType">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"
+			style="document" />
+		<operation name="print">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+	</binding>
+	<service name="ChildLocatorService">
+		<port name="ChildLocatorPort" binding="tns:ChildLocatorBinding">
+			<soap:address location="http://localhost:19287/ws" />
+		</port>
+	</service>
+</definitions>

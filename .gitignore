@@ -1,0 +1,17 @@
+# Compiled class file
+*.class
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# Eclipse
+.classpath
+bin/
+
+# Mac
+.DS_Store
+
+# Maven
+target/

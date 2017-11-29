@@ -4,7 +4,7 @@ public class ChildLocatorClientApp {
 
 	public static void main(String args[]) {
 		
-		String wsURL = "http://localhost:19287/ws";
+		String wsURL = args[0];
 		
 		// Create client
 		ChildLocatorClient client = null;

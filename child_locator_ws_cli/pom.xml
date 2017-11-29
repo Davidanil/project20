@@ -14,6 +14,10 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<mainclass>com.ist.sirs.child_locator.ws.cli.ChildLocatorClientApp</mainclass>
 
+		<ws.host>localhost</ws.host>
+		<ws.port>8071</ws.port>
+		<ws.url>http://${ws.host}:${ws.port}/ws</ws.url>
+		
 		<wsdl.directory>${basedir}/../child_locator_ws/src/main/resources</wsdl.directory>
 		<wsdl.filename>childLocator.1_0.wsdl</wsdl.filename>
 	</properties>
@@ -64,9 +68,9 @@
 				<version>1.6.0</version>
 				<configuration>
 					<mainClass>${mainclass}</mainClass>
-					<!-- <arguments> -->
-					<!-- <argument>argument1</argument> -->
-					<!-- </arguments> -->
+					<arguments>
+					<argument>${ws.url}</argument>
+					</arguments>
 				</configuration>
 			</plugin>
 

@@ -8,8 +8,8 @@ public class ChildLocatorEndpointManager {
 	public static void main (String args[]){
 		ChildLocatorPortImpl serverImpl = ChildLocatorPortImpl.getInstance();
 		
-		Endpoint.publish("http://localhost:19287/ws", serverImpl);
-		System.out.println("http://localhost:19287/ws");
+		Endpoint.publish(args[0], serverImpl);
+		System.out.println(args[0]);
 		try {
 			System.in.read();
 		} catch (IOException e) {

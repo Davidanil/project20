@@ -12,7 +12,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<mainclass>com.ist.sirs.child_locator.ws.cli.ClientApp</mainclass>
+		<mainclass>com.ist.sirs.child_locator.ws.cli.ChildLocatorClientApp</mainclass>
 
 		<wsdl.directory>${basedir}/../child_locator_ws/src/main/resources</wsdl.directory>
 		<wsdl.filename>childLocator.1_0.wsdl</wsdl.filename>
@@ -63,7 +63,7 @@
 				<artifactId>exec-maven-plugin</artifactId>
 				<version>1.6.0</version>
 				<configuration>
-					<mainClass>com.ist.sirs.child_locator.ws.cli.ClientApp</mainClass>
+					<mainClass>${mainclass}</mainClass>
 					<!-- <arguments> -->
 					<!-- <argument>argument1</argument> -->
 					<!-- </arguments> -->

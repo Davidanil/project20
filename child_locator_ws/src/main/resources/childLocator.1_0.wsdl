@@ -9,15 +9,16 @@
 	name="ChildLocatorService">
 
 	<types>
-		<!-- <xsd:schema> -->
-		<!-- <xsd:import namespace="http://ws.child_locator.sirs.ist.com/" -->
-		<!-- schemaLocation="http://localhost:19287/server?xsd=1" /> -->
-
 		<xs:schema xmlns:tns="http://ws.child_locator.sirs.ist.com/"
 			xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
 			targetNamespace="http://ws.child_locator.sirs.ist.com/">
+			
 			<xs:element name="print" type="tns:print" />
 			<xs:element name="printResponse" type="tns:printResponse" />
+			<xs:element name="login" type="tns:login" />
+			<xs:element name="loginResponse" type="tns:loginResponse" />
+			
+			
 			<xs:complexType name="print">
 				<xs:sequence />
 			</xs:complexType>
@@ -26,29 +27,45 @@
 					<xs:element name="return" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
+			<xs:complexType name="login">
+				<xs:sequence>
+					<xs:element name="username" type="xs:string" minOccurs="0" />
+					<xs:element name="password" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="loginResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:boolean"/>
+				</xs:sequence>
+			</xs:complexType>
 		</xs:schema>
-
-
-		<!-- </xsd:schema> -->
 	</types>
+	
+	
 	<message name="print">
-		<!-- <part name="parameters" element="tns:print" /> -->
 		<part name="print" element="tns:print" />
 	</message>
 	<message name="printResponse">
 		<!-- <part name="parameters" element="tns:printResponse" /> -->
 		<part name="printResponse" element="tns:printResponse" />
 	</message>
+	<message name="login">
+		<part name="login" element="tns:login" />
+	</message>
+	<message name="loginResponse">
+		<!-- <part name="parameters" element="tns:printResponse" /> -->
+		<part name="loginResponse" element="tns:loginResponse" />
+	</message>
 
 
 	<portType name="ChildLocatorPortType">
 		<operation name="print">
-			<!-- <input wsam:Action="http://ws.child_locator.sirs.ist.com/Server/printRequest" -->
-			<!-- message="tns:print" /> -->
-			<!-- <output wsam:Action="http://ws.child_locator.sirs.ist.com/Server/printResponse" -->
-			<!-- message="tns:printResponse" /> -->
 			<input name="print"	message="tns:print" />
 			<output name="printResponse" message="tns:printResponse" />
+		</operation>
+		<operation name="login">
+			<input name="login"	message="tns:login" />
+			<output name="loginResponse" message="tns:loginResponse" />
 		</operation>
 	</portType>
 	
@@ -57,6 +74,15 @@
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"
 			style="document" />
 		<operation name="print">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		<operation name="login">
 			<soap:operation soapAction="" />
 			<input>
 				<soap:body use="literal" />

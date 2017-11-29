@@ -27,4 +27,9 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType{
 	public String print(){
 		return "bazinga";
 	}
+	
+	@Override
+	public boolean login(String username, String password){
+		return false;
+	}
 }

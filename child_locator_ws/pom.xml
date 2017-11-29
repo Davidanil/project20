@@ -15,6 +15,8 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
 		<mainclass>com.ist.sirs.child_locator.ws.ChildLocatorEndpointManager</mainclass>
+	
+		<wsdl.filename>childLocator.1_0.wsdl</wsdl.filename>
 	</properties>
 
 	<dependencies>
@@ -31,136 +33,116 @@
 		</dependency>
 	</dependencies>
 
-
+<!-- <pluginManagement> -->
 	<build>
-		<!-- <plugins> -->
-
-		<!-- <plugin> -->
-		<!-- <groupId>org.codehaus.mojo</groupId> -->
-		<!-- <artifactId>exec-maven-plugin</artifactId> -->
-		<!-- <version>1.6.0</version> -->
-		<!-- <configuration> -->
-		<!-- <mainClass>com.ist.sirs.child_locator.ws.ServerEndpoint</mainClass> -->
-		<!-- <arguments> -->
-		<!-- <argument>argument1</argument> -->
-		<!-- </arguments> -->
-		<!-- </configuration> -->
-		<!-- </plugin> -->
-
-		<!-- </plugins> -->
-		<pluginManagement>
-			<plugins>
-
-
-
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>jaxws-maven-plugin</artifactId>
-					<version>2.4.1</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>wsimport</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<!-- https://jax-ws-commons.java.net/jaxws-maven-plugin/wsimport-mojo.html -->
-						<wsdlDirectory>${basedir}/src/main/resources</wsdlDirectory>
-					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>com.sun.xml.ws</groupId>
-							<artifactId>jaxws-tools</artifactId>
-							<version>2.2.10</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>exec-maven-plugin</artifactId>
-					<version>1.5.0</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>java</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<!-- to prevent deprecation warning: -->
-						<killAfter>-1</killAfter>
-						<mainClass>${mainclass}</mainClass>
-<!-- 						<arguments> -->
-<!-- 							<argument>${uddi.url}</argument> -->
-<!-- 							<argument>${ws.name}</argument> -->
-<!-- 							<argument>${ws.url}</argument> -->
-<!-- 						</arguments> -->
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>appassembler-maven-plugin</artifactId>
-					<version>1.10</version>
-					<executions>
-						<execution>
-							<phase>install</phase>
-							<goals>
-								<goal>assemble</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<programs>
-							<program>
-								<mainClass>${mainclass}</mainClass>
-								<id>${project.artifactId}</id>
-							</program>
-						</programs>
-					</configuration>
-				</plugin>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxws-maven-plugin</artifactId>
+				<version>2.4.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>wsimport</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<!-- https://jax-ws-commons.java.net/jaxws-maven-plugin/wsimport-mojo.html -->
+					<wsdlDirectory>${basedir}/src/main/resources</wsdlDirectory>
+					<wsdlFiles>
+						<wsdlFile>${wsdl.filename}</wsdlFile>
+					</wsdlFiles>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>com.sun.xml.ws</groupId>
+						<artifactId>jaxws-tools</artifactId>
+						<version>2.2.10</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.6.0</version>
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<goals> -->
+<!-- 							<goal>java</goal> -->
+<!-- 						</goals> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+				<configuration>
+					<!-- to prevent deprecation warning: -->
+					<killAfter>-1</killAfter>
+					<mainClass>${mainclass}</mainClass>
+					<!-- <arguments> -->
+					<!-- <argument>${uddi.url}</argument> -->
+					<!-- <argument>${ws.name}</argument> -->
+					<!-- <argument>${ws.url}</argument> -->
+					<!-- </arguments> -->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>appassembler-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>assemble</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<programs>
+						<program>
+							<mainClass>${mainclass}</mainClass>
+							<id>${project.artifactId}</id>
+						</program>
+					</programs>
+				</configuration>
+			</plugin>
 
 
 
 
 
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.7.0</version>
-					<configuration>
-						<source>1.7</source>
-						<target>1.7</target>
-					</configuration>
-				</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.7.0</version>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
 
-				<plugin>
-					<groupId>org.mortbay.jetty</groupId>
-					<artifactId>jetty-maven-plugin</artifactId>
-				</plugin>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.mortbay.jetty</groupId> -->
+<!-- 				<artifactId>jetty-maven-plugin</artifactId> -->
+<!-- 			</plugin> -->
 
-				<plugin>
-					<groupId>org.codehaus.mojo</groupId>
-					<artifactId>build-helper-maven-plugin</artifactId>
-					<executions>
-						<execution>
-							<id>add-source</id>
-							<phase>generate-sources</phase>
-							<goals>
-								<goal>add-source</goal>
-							</goals>
-							<configuration>
-								<sources>
-									<source>${basedir}/target/generated/src/main/java</source>
-								</sources>
-							</configuration>
-						</execution>
-					</executions>
-				</plugin>
-
-				
-				
-			</plugins>
-		</pluginManagement>
+<!-- 			<plugin> -->
+<!-- 				<groupId>org.codehaus.mojo</groupId> -->
+<!-- 				<artifactId>build-helper-maven-plugin</artifactId> -->
+<!-- 				<executions> -->
+<!-- 					<execution> -->
+<!-- 						<id>add-source</id> -->
+<!-- 						<phase>generate-sources</phase> -->
+<!-- 						<goals> -->
+<!-- 							<goal>add-source</goal> -->
+<!-- 						</goals> -->
+<!-- 						<configuration> -->
+<!-- 							<sources> -->
+<!-- 								<source>${basedir}/target/generated/src/main/java</source> -->
+<!-- 							</sources> -->
+<!-- 						</configuration> -->
+<!-- 					</execution> -->
+<!-- 				</executions> -->
+<!-- 			</plugin> -->
+		</plugins>
 	</build>
 </project>

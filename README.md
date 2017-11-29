@@ -1,10 +1,10 @@
 # Projecto Grupo 20
 
 ### Correr o projecto:
-* cd child_locator_ws && mvn jaxws:wsimport && mvn install exec:java
-* cd child_locator_ws_cli && mvn jaxws:wsimport && mvn install exec:java
+* mvn clean install -DskipTests exec:java
 
-Caso dê algum problema vejam o endereço no ChildLocatorEndpointManager.java e alterem para outro. Se alterarem, também têm de o fazer no ClientApp.java
+
+Caso dê algum problema de binding por repetir endereços, vejam as poms do server e cliente e mudem a porta (ou então matem o processo actual)
 
 Usefull links:
   https://crackstation.net/hashing-security.htm

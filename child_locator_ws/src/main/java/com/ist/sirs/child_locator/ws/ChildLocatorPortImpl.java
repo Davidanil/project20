@@ -1,5 +1,6 @@
 package com.ist.sirs.child_locator.ws;
 
+import javax.jws.HandlerChain;
 import javax.jws.WebService;
 
 @WebService(
@@ -10,6 +11,7 @@ import javax.jws.WebService;
 		targetNamespace = "http://ws.child_locator.sirs.ist.com/", 
 		serviceName = "ChildLocatorService"
 		)
+//@HandlerChain(file="/child_locator_ws_handler_chain.xml")
 public class ChildLocatorPortImpl implements ChildLocatorPortType{
 	private ChildLocatorPortImpl() {
 		
@@ -30,6 +32,6 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType{
 	
 	@Override
 	public boolean login(String username, String password){
-		return false;
+		return username.equals("sheldon") && password.equals("bazinga");
 	}
 }

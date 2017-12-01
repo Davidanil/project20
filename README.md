@@ -21,8 +21,8 @@ Edited on 30/11/2017:
 
 ### ToDo:
 * Secure channels
-* ~Handlers with timestamps -> freshness~
-* Message Hashes
+* ~Handlers with timestamps -> freshness Add TimeHandler to Client~
+* ~Message Hashes~
 * Last location of child (saved locally)
 * Tracking
 * Register/Add device (nonces )

@@ -17,11 +17,14 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import java.time.LocalDateTime;
-import java.util.concurrent.TimeUnit;
-
 
 public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
+	
+	public static final String HandlerName = "TimeHeader";
+	public static final String HandlerPrefix = "T";
+	public static final String HandlerNamespace = "http://demo";
 
+	
 	public static final String CONTEXT_PROPERTY = "time.property";
 
 	//
@@ -62,7 +65,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 					sh = se.addHeader();
 
 				// add header element (name, namespace prefix, namespace)
-				Name name = se.createName("TimeHeader", "d", "http://demo");
+				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
 				SOAPHeaderElement element = sh.addHeaderElement(name);
 
 				// add header element value
@@ -87,8 +90,8 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				}
 
 				// get first header element
-				Name name = se.createName("TimeHeader", "d", "http://demo");
-				Iterator it = sh.getChildElements(name);
+				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
+				Iterator<?> it = sh.getChildElements(name);
 				// check header element
 				if (!it.hasNext()) {
 					System.out.println("Header element not found.");

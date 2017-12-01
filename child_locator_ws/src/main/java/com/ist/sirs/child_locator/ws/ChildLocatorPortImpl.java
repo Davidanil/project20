@@ -150,5 +150,17 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 
 	    return hexString.toString();
 	}
+	
+	public byte[] ToByteArray(String s) {
+		byte[] data = null;
+		if(s.isEmpty()) return data;
+	    int len = s.length();
+	    data = new byte[len / 2];
+	    for (int i = 0; i < len; i += 2) {
+	        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+	                             + Character.digit(s.charAt(i+1), 16));
+	    }
+	    return data;
+	}
 
 }

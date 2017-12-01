@@ -17,7 +17,7 @@
 			<xs:element name="printResponse" type="tns:printResponse" />
 			<xs:element name="login" type="tns:login" />
 			<xs:element name="loginResponse" type="tns:loginResponse" />
-			<xs:element name="register" type="tns:login" />
+			<xs:element name="register" type="tns:register" />
 			<xs:element name="registerResponse" type="tns:registerResponse" />
 			
 			<xs:complexType name="print">
@@ -125,7 +125,7 @@
 	</binding>
 	<service name="ChildLocatorService">
 		<port name="ChildLocatorPort" binding="tns:ChildLocatorBinding">
-			<soap:address location="http://localhost:8071/ws" />
+			<soap:address location="http://localhost:8080/ws" />
 		</port>
 	</service>
 </definitions>

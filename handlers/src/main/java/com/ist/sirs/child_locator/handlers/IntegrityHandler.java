@@ -1,4 +1,4 @@
-package com.ist.sirs.child_locator.ws.handler;
+package com.ist.sirs.child_locator.handlers;
 
 import java.util.Iterator;
 import java.util.Set;

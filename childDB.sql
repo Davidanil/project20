@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `childdb`.`login` (
   `password` VARCHAR(64) NOT NULL,
   `attempts` TINYINT(16) NULL DEFAULT '0',
   `verified` TINYINT(1) NULL DEFAULT '0',
+	`lastlogin` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`phone`),
   UNIQUE INDEX `username_UNIQUE` (`phone` ASC),
   UNIQUE INDEX `salt_UNIQUE` (`salt` ASC))

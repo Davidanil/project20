@@ -7,7 +7,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Scanner;
-import java.util.concurrent.Callable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,20 +28,20 @@ public class ChildLocatorClientApp {
 			createPin();
 		else
 			checkPin();
-
 	}
 
 	public static void createPin() {
 		Scanner scanner = new Scanner(System.in);
 		String pin;
-
+		boolean loop = true;
+		
 		clearScreen();
-		System.out.println("Welcome to Child Locator");
+		System.out.println("[CREATE PIN]");
 		System.out.println("Since its the first time you execute this app, choose a 4-8 digit Pin:");
 
-		while (true) {
+		while (loop) {
 			try {
-				System.out.print("Pin: ");
+				System.out.print("\tPin: ");
 				pin = scanner.next();
 
 				// check if valid
@@ -56,135 +55,155 @@ public class ChildLocatorClientApp {
 					FileOutputStream out = new FileOutputStream("src/main/resources/pin");
 					out.write(hash);
 					out.close();
-					
-					firstMenuViewInterface();
-					return;
+
+					firstMenu();
+					loop = false;
 				} else
 					System.out.println("Invalid pin, try again:");
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
 			}
 		}
+		
+		scanner.close();
 	}
 
 	public static void checkPin() {
 		Scanner scanner = new Scanner(System.in);
 		String pin;
+		int failedAttempts = 0;
+		boolean loop = true;
 
 		clearScreen();
-		System.out.println("Welcome to Child Locator");
+		System.out.println("[CHECK PIN]");
 		System.out.println("Insert your Pin:");
 
-		while (true) {
+		while (loop) {
 			try {
-				System.out.print("Pin: ");
+				System.out.print("\tPin: ");
 				pin = scanner.next();
 
 				// hash pin and compare it
-					MessageDigest digest = MessageDigest.getInstance("SHA-256");
-					byte[] hash = digest.digest(pin.getBytes(StandardCharsets.UTF_8));
-					
-					File file = new File("src/main/resources/pin");
-					//init array with file length
-					byte[] hashPinFile = new byte[(int) file.length()];
+				MessageDigest digest = MessageDigest.getInstance("SHA-256");
+				byte[] hash = digest.digest(pin.getBytes(StandardCharsets.UTF_8));
 
-					FileInputStream fis = new FileInputStream(file);
-					fis.read(hashPinFile); //read file into bytes[]
-					fis.close();
-					
-					if(Arrays.equals(hash,hashPinFile)){
-						firstMenuViewInterface();
-						return;
-					}
-					else{
-						System.out.println("Pin incorrect, try again.");
-					}
+				File file = new File("src/main/resources/pin");
+				// init array with file length
+				byte[] hashPinFile = new byte[(int) file.length()];
 
-				
+				FileInputStream fis = new FileInputStream(file);
+				fis.read(hashPinFile); // read file into bytes[]
+				fis.close();
+
+				if (Arrays.equals(hash, hashPinFile)) {
+					firstMenu();
+					loop = false;
+				} else {
+					failedAttempts++;
+					
+					if(failedAttempts > 3){
+						try {
+							// wait e^(failedAttempts) minutes
+							double minutesToSleep = Math.pow(Math.E, failedAttempts);
+							int millisToSleep = (int) minutesToSleep * 60 * 1000;
+ 							System.out.format("This is your %d attempt, so youll have to wait %f minutes "
+ 									+ "before retrying.\n", failedAttempts, minutesToSleep);
+						    Thread.sleep(millisToSleep);
+						} catch(InterruptedException ex) {
+						    Thread.currentThread().interrupt();
+						    System.out.println("Exception: " + ex.getMessage());
+						}
+					}
+					
+					System.out.println("Pin incorrect, try again.");
+
+				}
+
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
-			}
+			} 
 		}
+		
+		scanner.close();
 	}
 
-	public static void firstMenuViewInterface() {
-		Scanner scanner;
+	public static void firstMenu() {
+		Scanner scanner = new Scanner(System.in);
 		String option;
-
+		boolean loop = true;
+		
 		clearScreen();
+		System.out.println("[FIRST MENU]");
 		System.out.println("What do you want to do?");
 
-		while (true) {
-			scanner = new Scanner(System.in);
+		while (loop) {
 
 			System.out.println("\t1 - Login");
 			System.out.println("\t2 - Register");
-			System.out.print("Number of the option: ");
+			System.out.print("\tNumber of the option: ");
 
 			try {
 				option = scanner.next();
 
 				switch (option) {
 				case "1":
-					loginViewInterface();
-					return;
+					login();
+					loop = false;
 				case "2":
-					registerViewInterface();
-					return;
+					register();
+					loop = false;
 				default:
 					System.out.println("Invalid option, try again:");
 					break;
 				}
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
-				scanner.close();
 			}
 		}
+		
+		scanner.close();
 
 	}
 
-	public static void loginViewInterface() {
-		Scanner scanner;
+	public static void login() {
+		Scanner scanner = new Scanner(System.in);
 		String username, password;
-
+		boolean loop = true;
+		
 		clearScreen();
+		System.out.println("[LOGIN]");
 		System.out.println("Provide your info:");
 
-		while (true) {
-			scanner = new Scanner(System.in);
+		while (loop) {
+			
 			try {
-				System.out.print("Username: ");
+				System.out.print("\tUsername: ");
 				username = scanner.next();
-				System.out.print("Password: ");
+				System.out.print("\tPassword: ");
 				password = scanner.next();
 
 				// TODO: check if user can login (e^c)
 				if (client.login(username, password)) {
-					mainViewInterface();
-					return;
+					mainMenu();
+					loop = false;
 				}
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
-				System.out.println("Invalid login, try again:");
-				scanner.close();
 			}
 		}
+		
+		scanner.close();
 	}
 
-	public static void registerViewInterface() {
-		Scanner scanner;
+	public static void register() {
+		Scanner scanner = new Scanner(System.in);
 		String phone, email, password;
+		boolean loop = true;
 
 		clearScreen();
 		System.out.println("Provide your info:");
 
-		while (true) {
-			scanner = new Scanner(System.in);
-
+		while (loop) {
 			try {
 				System.out.print("Phone: ");
 				phone = scanner.next();
@@ -195,27 +214,24 @@ public class ChildLocatorClientApp {
 
 				// TODO: Check if register was successful
 				// if (client.register(phone,email, password)) {
-				// scanner.close();
 				// mainViewInterface();
-				// return;
+				// loop = false;
 				// }
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
-				scanner.close();
 			}
 		}
+		
+		scanner.close();
 	}
 
-	public static void mainViewInterface() {
-		Scanner scanner;
+	public static void mainMenu() {
+		Scanner scanner = new Scanner(System.in);
 		String option;
-
+		boolean loop = true;
+		
 		System.out.println("What do you want to do?");
-
-		while (true) {
-			scanner = new Scanner(System.in);
-
+		while (loop) {
 			System.out.println("\t1 - Check followees");
 			System.out.println("\t2 - Check followers");
 			System.out.println("\t3 - Add new follower");
@@ -227,23 +243,22 @@ public class ChildLocatorClientApp {
 				switch (option) {
 				case "1":
 					checkFollowees();
-					return;
+					loop = false;
 				case "2":
 					checkFollowers();
-					return;
+					loop = false;
 				case "3":
 					addFollower();
-					return;
+					loop = false;
 				default:
 					System.out.println("Invalid login, try again:");
 					break;
 				}
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} finally {
-				scanner.close();
 			}
 		}
+		scanner.close();
 	}
 
 	public static void checkFollowees() {

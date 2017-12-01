@@ -41,7 +41,7 @@ public class ChildLocatorClientApp {
 
 		while (loop) {
 			try {
-				System.out.print("\tPin: ");
+				System.out.print("Pin: ");
 				pin = scanner.next();
 
 				// check if valid
@@ -80,7 +80,7 @@ public class ChildLocatorClientApp {
 
 		while (loop) {
 			try {
-				System.out.print("\tPin: ");
+				System.out.print("Pin: ");
 				pin = scanner.next();
 
 				// hash pin and compare it
@@ -140,7 +140,7 @@ public class ChildLocatorClientApp {
 
 			System.out.println("\t1 - Login");
 			System.out.println("\t2 - Register");
-			System.out.print("\tNumber of the option: ");
+			System.out.print("Number of the option: ");
 
 			try {
 				option = scanner.next();
@@ -167,7 +167,7 @@ public class ChildLocatorClientApp {
 
 	public static void login() {
 		Scanner scanner = new Scanner(System.in);
-		String username, password;
+		String email, password;
 		boolean loop = true;
 		
 		clearScreen();
@@ -177,16 +177,19 @@ public class ChildLocatorClientApp {
 		while (loop) {
 			
 			try {
-				System.out.print("\tUsername: ");
-				username = scanner.next();
-				System.out.print("\tPassword: ");
+				System.out.print("Email: ");
+				email = scanner.next();
+				System.out.print("Password: ");
 				password = scanner.next();
 
 				// TODO: check if user can login (e^c)
-				if (client.login(username, password)) {
+				if (client.login(email, password)) {
 					mainMenu();
 					loop = false;
 				}
+				else
+					System.out.println("Wrong info, try again.");
+
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
 			}
@@ -207,7 +210,7 @@ public class ChildLocatorClientApp {
 			try {
 				System.out.print("Phone: ");
 				phone = scanner.next();
-				System.out.print("Username: ");
+				System.out.print("Email: ");
 				email = scanner.next();
 				System.out.print("Password: ");
 				password = scanner.next();

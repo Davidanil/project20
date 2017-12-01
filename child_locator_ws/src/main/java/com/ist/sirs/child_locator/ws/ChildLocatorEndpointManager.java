@@ -1,8 +1,14 @@
 package com.ist.sirs.child_locator.ws;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 import javax.xml.ws.Endpoint;
+
+import com.ist.sirs.child_locator.ws.db.ChildLocatorDB;
+
 
 public class ChildLocatorEndpointManager {
 	public static void main (String args[]){

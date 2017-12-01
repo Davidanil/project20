@@ -8,5 +8,8 @@
         <handler>
             <handler-class>com.ist.sirs.child_locator.handlers.LoggingHandler</handler-class>
         </handler>
+        <handler>
+            <handler-class>com.ist.sirs.child_locator.ws.handler.IntegrityHandler</handler-class>
+        </handler>
     </handler-chain>
 </handler-chains>

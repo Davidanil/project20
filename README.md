@@ -17,3 +17,14 @@ Edited on 30/11/2017:
 	childDB.sql - Cria DB
 	login.sql - insert 2 users (ler os comments)
 	connected.sql - insert 1 conexão
+	
+
+### ToDo:
+* Secure channels
+* Handlers with timestamps -> freshness
+* Message Hashes
+* Last location of child (saved locally)
+* Tracking
+* Register/Add device (nonces )
+* 2factor authentication / reauthentication
+* certificates

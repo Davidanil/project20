@@ -1,8 +1,13 @@
 package com.ist.sirs.child_locator.ws;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
 
@@ -41,8 +46,20 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 			//String passwordHash = TODO
 			return db.login(email,password);
 		}
-		else
-			return false;
+		
+		return false;
+	}
+	
+	@Override
+	public boolean register(String phoneNumber, String email, String password1, String password2){
+		if(isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password1)
+				&& isPassword(password2) && password1.equals(password2)){
+			byte[] salt = generateSalt();
+			byte[] hash = hashPassword(password1, salt);
+			return db.register(phoneNumber, email, toHexString(salt), toHexString(hash));
+		}
+		
+		return false;	
 	}
 
 	// --------------- AUX METHODS -----------------
@@ -86,6 +103,52 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		System.err.println("Phone number must contain 9 digits");
 		return false;
 
+	}
+	
+	public byte[] hashPassword(String password, byte[] salt) {
+		char[] pass = password.toCharArray();
+        PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 32 * 8);
+        SecretKeyFactory skf;
+        byte[] hash=null;
+		try {
+			skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+			hash = skf.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			System.err.println("Failed to generate hash for password " + e);
+		}
+		
+        //System.out.println(toHexString(hash));
+		return hash;
+	}
+	
+	public byte[] generateSalt() {
+		SecureRandom random = null;
+		try {
+			new SecureRandom();
+			//The name of the pseudo-random number generation (PRNG) algorithm supplied by the SUN provider
+			random = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("Failed to generate salt " + e);
+		}
+        byte bytes[] = new byte[32];
+        //System.out.println( random.getAlgorithm());
+        random.nextBytes(bytes);
+        return bytes;
+
+	}
+	
+	public String toHexString(byte[] bytes) {
+	    StringBuilder hexString = new StringBuilder();
+
+	    for (int i = 0; i < bytes.length; i++) {
+	        String hex = Integer.toHexString(0xFF & bytes[i]);
+	        if (hex.length() == 1) {
+	            hexString.append('0');
+	        }
+	        hexString.append(hex);
+	    }
+
+	    return hexString.toString();
 	}
 
 }

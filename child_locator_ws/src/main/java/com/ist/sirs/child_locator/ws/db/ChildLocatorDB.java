@@ -2,13 +2,14 @@ package com.ist.sirs.child_locator.ws.db;
 
 import java.io.Reader;
 import java.sql.Connection;
-import java.sql.Date;
+
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +62,38 @@ public class ChildLocatorDB {
 		} catch (SQLException e) {
 			return false;
 		}
+	}
+	
+	public boolean register(String phoneNumber, String email, String salt, String hash){
+		try {
+			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
+			stmt.setString(1, phoneNumber);
+			ResultSet rs = stmt.executeQuery();
+			
+			//user is already registered
+			if(rs.next())
+				return false;
+			
+			stmt = connection.prepareStatement("INSERT INTO login('phone','email','salt','password','lastlogin') "
+					+ "VALUES(?,?,?,?,?)");
+			Date date = new Date();
+			Timestamp ts = new Timestamp(date.getTime());
+			stmt.setString(1, phoneNumber);
+			stmt.setString(2, email);
+			stmt.setString(3, salt);
+			stmt.setString(4, hash);
+			stmt.setTimestamp(5, ts);
+			int count = stmt.executeUpdate();
+			
+			//successful insert
+			if(count > 0)
+				return true;
+			else
+				return false;
+			
+			} catch (SQLException e) {
+				return false;
+			}
 	}
 
 	// Print login table

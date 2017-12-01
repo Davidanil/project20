@@ -62,4 +62,9 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 		Timestamp ts = new Timestamp(date.getTime());
 		return port.login(email, password);
 	}
+	
+	@Override
+	public boolean register(String phoneNumber, String email, String password1, String password2){
+		return port.register(phoneNumber, email, password1, password2);
+	}
 }

@@ -17,7 +17,8 @@
 			<xs:element name="printResponse" type="tns:printResponse" />
 			<xs:element name="login" type="tns:login" />
 			<xs:element name="loginResponse" type="tns:loginResponse" />
-			
+			<xs:element name="register" type="tns:login" />
+			<xs:element name="registerResponse" type="tns:registerResponse" />
 			
 			<xs:complexType name="print">
 				<xs:sequence />
@@ -38,6 +39,19 @@
 					<xs:element name="return" type="xs:boolean"/>
 				</xs:sequence>
 			</xs:complexType>
+			<xs:complexType name="register">
+				<xs:sequence>
+					<xs:element name="phoneNumber" type="xs:string" minOccurs="0" />
+					<xs:element name="email" type="xs:string" minOccurs="0" />
+					<xs:element name="password1" type="xs:string" minOccurs="0" />
+					<xs:element name="password2" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="registerResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:boolean"/>
+				</xs:sequence>
+			</xs:complexType>
 		</xs:schema>
 	</types>
 	
@@ -46,15 +60,19 @@
 		<part name="print" element="tns:print" />
 	</message>
 	<message name="printResponse">
-		<!-- <part name="parameters" element="tns:printResponse" /> -->
 		<part name="printResponse" element="tns:printResponse" />
 	</message>
 	<message name="login">
 		<part name="login" element="tns:login" />
 	</message>
 	<message name="loginResponse">
-		<!-- <part name="parameters" element="tns:printResponse" /> -->
 		<part name="loginResponse" element="tns:loginResponse" />
+	</message>
+	<message name="register">
+		<part name="register" element="tns:register" />
+	</message>
+	<message name="registerResponse">
+		<part name="registerResponse" element="tns:registerResponse" />
 	</message>
 
 
@@ -66,6 +84,10 @@
 		<operation name="login">
 			<input name="login"	message="tns:login" />
 			<output name="loginResponse" message="tns:loginResponse" />
+		</operation>
+		<operation name="register">
+			<input name="register"	message="tns:register" />
+			<output name="registerResponse" message="tns:registerResponse" />
 		</operation>
 	</portType>
 	
@@ -83,6 +105,15 @@
 			</output>
 		</operation>
 		<operation name="login">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		<operation name="register">
 			<soap:operation soapAction="" />
 			<input>
 				<soap:body use="literal" />

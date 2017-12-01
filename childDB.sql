@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `childdb`.`connected` (
   `connectid` INT(11) NOT NULL AUTO_INCREMENT,
   `phone` INT(11) NOT NULL,
   `phone2` INT(11) NOT NULL,
-  `connected` TINYINT(4) NULL DEFAULT '0',
+  `connected` TINYINT(1) NULL DEFAULT '0',
   `nonce` INT(11) NULL DEFAULT NULL,
   `timestamp` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY (`connectid`),
@@ -42,12 +42,12 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `childdb`.`login`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `childdb`.`login` (
-  `phone` INT(11) NOT NULL,
-  `email` VARCHAR(45) NOT NULL,
-  `salt` VARCHAR(45) NOT NULL,
-  `password` LONGTEXT NOT NULL,
-  `attempts` INT(11) NULL DEFAULT '0',
-  `verified` TINYINT(4) NULL DEFAULT '0',
+  `phone` INT(16) NOT NULL,
+  `email` VARCHAR(254) NOT NULL,
+  `salt` VARCHAR(64) NOT NULL,
+  `password` VARCHAR(64) NOT NULL,
+  `attempts` TINYINT(16) NULL DEFAULT '0',
+  `verified` TINYINT(1) NULL DEFAULT '0',
   PRIMARY KEY (`phone`),
   UNIQUE INDEX `username_UNIQUE` (`phone` ASC),
   UNIQUE INDEX `salt_UNIQUE` (`salt` ASC))

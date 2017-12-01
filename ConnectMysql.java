@@ -5,11 +5,21 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Base64;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Provider;
 import java.security.SecureRandom;
+import java.security.Security;
+import java.security.spec.InvalidKeySpecException;
 
 
 public class ConnectMysql {
@@ -126,49 +136,71 @@ public class ConnectMysql {
 	}
 	
 	//FIXME Register is almost complete, need to generate salt and hash using java.Secure.Random
-	public static void main(String[] args) throws SQLException, NoSuchAlgorithmException {
+	public static void main(String[] args) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
 		
 /*		Connection conn = connectDB();
-	
- 		PRINT ALL TABLES
-		ResultSet rs = doQuery(conn, "SELECT * FROM login");
-		printLoginTable(rs);
-		System.out.println();
-		rs = doQuery(conn, "SELECT * FROM connected");
-		printConnectedTable(rs);
+		ResultSet rs = doQuery(conn, "FIXME");
 		conn.close();
 */		
 		
-		//REGISTER
-		Scanner in = new Scanner(System.in);
-		
-		System.out.println("Input phone number: ");
-		String phone = in.nextLine();
-//		isPhoneNumber(phone);
+        byte[] salt = generateSalt();
+        System.out.println(toHexString(salt)); //check salt
+        char[] pass= "teste123".toCharArray();
+        
 
-		System.out.println("Input email: ");
-		String email = in.nextLine();
-//		System.out.println(isEmail(email));
 		
-		System.out.println("Input password: ");
-		String password = in.nextLine();
-//		isPassword(password);
-		
-		System.out.println("Confirm password: ");
-		String password2 = in.nextLine();
-//		isPasswordEqual(password, password2);
-		
-		if(isPhoneNumber(phone) && isEmail(email) && isPassword(password) && isPasswordEqual(password, password2))
-				System.out.println("Submiting data...");
-		else main(args);
-		
-		//Generate SALT to be on server side TODO
 		//HASH PASSWORD to be on server side TODO
+
 		
 		//String to be on server side to insert into database TODO
 		//String s = "INSERT INTO `login` (`phone`,`email`,`salt`,`password`,`attempts`,`verified`) VALUES "
 		//+ "(" + phone + "," + email + "," + salt + "," + pass + ", 0, 0)";
 		
+	}
+	
+	
+	private static byte[] generateSalt() {
+		SecureRandom random = null;
+		try {
+			new SecureRandom();
+			//The name of the pseudo-random number generation (PRNG) algorithm supplied by the SUN provider
+			random = SecureRandom.getInstance("SHA1PRNG");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("Failed to generate salt " + e);
+		}
+        byte bytes[] = new byte[32];
+        //System.out.println( random.getAlgorithm());
+        random.nextBytes(bytes);
+        return bytes;
+
+	}
+	
+	public static void hashPassword(char[] pass, byte[] salt) {
+        PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 32 * 8);
+        SecretKeyFactory skf;
+        byte[] hash=null;
+		try {
+			skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+			hash = skf.generateSecret(spec).getEncoded();
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			System.err.println("Failed to generate hash for password " + e);
+		}
+
+        System.out.println(toHexString(hash));
+	}
+	
+	public static String toHexString(byte[] bytes) {
+	    StringBuilder hexString = new StringBuilder();
+
+	    for (int i = 0; i < bytes.length; i++) {
+	        String hex = Integer.toHexString(0xFF & bytes[i]);
+	        if (hex.length() == 1) {
+	            hexString.append('0');
+	        }
+	        hexString.append(hex);
+	    }
+
+	    return hexString.toString();
 	}
 	
 }

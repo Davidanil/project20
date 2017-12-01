@@ -12,11 +12,11 @@ Usefull links:
 
   
 Edited on 30/11/2017:
-	ConnectMySql.java - funçoes para validar o registo e conectar a base de dados. (ler os TODO)
-	mysql-connector-java-5.1.44-bin - external library pode ser precisa para ^
-	childDB.sql - Cria DB
-	login.sql - insert 2 users (ler os comments)
-	connected.sql - insert 1 conexão
+* ConnectMySql.java - funçoes para validar o registo e conectar a base de dados. (ler os TODO)
+* mysql-connector-java-5.1.44-bin - external library pode ser precisa para ^
+* childDB.sql - Cria DB
+* login.sql - insert 2 users (ler os comments)
+* connected.sql - insert 1 conexão
 	
 
 ### ToDo:

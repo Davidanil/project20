@@ -20,7 +20,7 @@ Edited on 30/11/2017:
 	
 
 ### ToDo:
-* Secure channels
+* Secure channels - (server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)
 * ~Handlers with timestamps -> freshness Add TimeHandler to Client~
 * ~Message Hashes~
 * Last location of child (saved locally)

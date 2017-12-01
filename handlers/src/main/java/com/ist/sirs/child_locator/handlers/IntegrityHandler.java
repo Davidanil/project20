@@ -84,7 +84,7 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 			AddHeader(smc, hash.toString());
 		}
 		else if(!CompareHash(smc, hash.toString())){ // Compare hash
-			// Error
+			throw new RuntimeException(String.format("Message hashes don't match.")); // Error
 		}
 	}
 	

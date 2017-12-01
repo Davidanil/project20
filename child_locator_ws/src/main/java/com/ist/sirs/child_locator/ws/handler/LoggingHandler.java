@@ -42,7 +42,8 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 		
 	
         System.out.println("Handling soap message...");
-		
+	
+	// print entire SOAP message
 	//try{
 	//	smc.getMessage().writeTo(System.out);
 	//} catch(Exception e){}

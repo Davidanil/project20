@@ -3,7 +3,9 @@ package com.ist.sirs.child_locator.ws.cli;
 import static javax.xml.ws.BindingProvider.ENDPOINT_ADDRESS_PROPERTY;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -55,7 +57,9 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 
 	@Override
-	public boolean login(String username, String password){
-		return port.login(username, password);
+	public boolean login(String email, String password){
+		Date date = new Date();
+		Timestamp ts = new Timestamp(date.getTime());
+		return port.login(email, password);
 	}
 }

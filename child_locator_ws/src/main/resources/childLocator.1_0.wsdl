@@ -29,7 +29,7 @@
 			</xs:complexType>
 			<xs:complexType name="login">
 				<xs:sequence>
-					<xs:element name="username" type="xs:string" minOccurs="0" />
+					<xs:element name="email" type="xs:string" minOccurs="0" />
 					<xs:element name="password" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
@@ -94,7 +94,7 @@
 	</binding>
 	<service name="ChildLocatorService">
 		<port name="ChildLocatorPort" binding="tns:ChildLocatorBinding">
-			<soap:address location="http://localhost:19287/ws" />
+			<soap:address location="http://localhost:8071/ws" />
 		</port>
 	</service>
 </definitions>

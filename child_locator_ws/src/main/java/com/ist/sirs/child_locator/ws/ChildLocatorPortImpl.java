@@ -41,8 +41,8 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	}
 
 	@Override
-	public boolean login(String email, String password) {
-		if(isEmail(email) && isPassword(password)){
+	public boolean login(String phoneNumber, String email, String password) {
+		if(isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)){
 			//String passwordHash = TODO
 			return db.login(email,password);
 		}

@@ -167,7 +167,7 @@ public class ChildLocatorClientApp {
 
 	public static void login() {
 		Scanner scanner = new Scanner(System.in);
-		String email, password;
+		String phoneNumber, email, password;
 		boolean loop = true;
 		
 		clearScreen();
@@ -177,13 +177,15 @@ public class ChildLocatorClientApp {
 		while (loop) {
 			
 			try {
+				System.out.print("Phone Number: ");
+				phoneNumber = scanner.next();
 				System.out.print("Email: ");
 				email = scanner.next();
 				System.out.print("Password: ");
 				password = scanner.next();
 
 				// TODO: check if user can login (e^c)
-				if (client.login(email, password)) {
+				if (client.login(phoneNumber, email, password)) {
 					mainMenu();
 					loop = false;
 				}

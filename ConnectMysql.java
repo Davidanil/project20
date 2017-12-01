@@ -135,28 +135,6 @@ public class ConnectMysql {
 		
 	}
 	
-	//FIXME Register is almost complete, need to generate salt and hash using java.Secure.Random
-	public static void main(String[] args) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
-		
-/*		Connection conn = connectDB();
-		ResultSet rs = doQuery(conn, "FIXME");
-		conn.close();
-*/		
-		
-        byte[] salt = generateSalt();
-        System.out.println(toHexString(salt)); //check salt
-        char[] pass= "teste123".toCharArray();
-        
-
-		
-		//HASH PASSWORD to be on server side TODO
-
-		
-		//String to be on server side to insert into database TODO
-		//String s = "INSERT INTO `login` (`phone`,`email`,`salt`,`password`,`attempts`,`verified`) VALUES "
-		//+ "(" + phone + "," + email + "," + salt + "," + pass + ", 0, 0)";
-		
-	}
 	
 	
 	private static byte[] generateSalt() {
@@ -170,12 +148,12 @@ public class ConnectMysql {
 		}
         byte bytes[] = new byte[32];
         //System.out.println( random.getAlgorithm());
-        random.nextBytes(bytes);
+        random.nextBytes(bytes);        
         return bytes;
 
 	}
 	
-	public static void hashPassword(char[] pass, byte[] salt) {
+	public static String hashPassword(char[] pass, byte[] salt) {
         PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 32 * 8);
         SecretKeyFactory skf;
         byte[] hash=null;
@@ -185,22 +163,115 @@ public class ConnectMysql {
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			System.err.println("Failed to generate hash for password " + e);
 		}
-
-        System.out.println(toHexString(hash));
+		
+        return toHexString(hash);
 	}
 	
-	public static String toHexString(byte[] bytes) {
-	    StringBuilder hexString = new StringBuilder();
+		public static String toHexString(byte[] bytes) {
+		    StringBuilder hexString = new StringBuilder();
+	
+		    for (int i = 0; i < bytes.length; i++) {
+		        String hex = Integer.toHexString(0xFF & bytes[i]);
+		        if (hex.length() == 1) {
+		            hexString.append('0');
+		        }
+		        hexString.append(hex);
+		    }
+	
+		    return hexString.toString();
+		}
 
-	    for (int i = 0; i < bytes.length; i++) {
-	        String hex = Integer.toHexString(0xFF & bytes[i]);
-	        if (hex.length() == 1) {
-	            hexString.append('0');
-	        }
-	        hexString.append(hex);
-	    }
-
-	    return hexString.toString();
+		
+		public static byte[] ToByteArray(String s) {
+			byte[] data = null;
+			if(s.isEmpty()) return data;
+		    int len = s.length();
+		    data = new byte[len / 2];
+		    for (int i = 0; i < len; i += 2) {
+		        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+		                             + Character.digit(s.charAt(i+1), 16));
+		    }
+		    return data;
+		}
+	
+	public static void main(String[] args) throws SQLException, NoSuchAlgorithmException, InvalidKeySpecException {
+		
+		Connection conn = connectDB();
+		ResultSet rs;
+		
+/*		Insert into database with hash salt
+ 
+		String delete = "DELETE FROM `childdb`.`login` WHERE `phone`='913435145'";
+		
+		Statement stmt = conn.createStatement();
+		stmt.executeUpdate(delete);
+		
+		String phone="913435145";
+		String email="DAVIDD@hotmail.com";
+		String salt = toHexString(generateSalt());
+		String password= "teste";
+		String pass = hashPassword(password.toCharArray(), ToByteArray(salt));
+		
+		//System.out.println(pass);
+        
+        String insert = "INSERT INTO `login` (`phone`,`email`,`salt`,`password`,`attempts`,`verified`, `lastlogin`) VALUES "
+        		+ "('" + phone + "','" + email + "','" + salt + "','" + pass + "', 0, 0, now())";
+        //System.out.println(insert);
+        
+        stmt = conn.createStatement();
+		stmt.executeUpdate(insert);
+        
+        //checks if its right
+        rs = doQuery(conn, "Select * from login");
+        printLoginTable(rs);*/
+/*****************************************************************************************************/
+		Scanner in = new Scanner(System.in);
+    	System.out.println("Input phone number: ");
+		String phone = in.nextLine();
+    	System.out.println("Input pass: ");
+		String pass = in.nextLine();
+		
+		//USE INSERT ABOVE
+		login(phone, pass);
+		
 	}
+	
+	private static boolean login(String userphone, String userpass) throws SQLException {
+		
+		//Login
+    	
+		Connection conn = connectDB();
+		ResultSet rs;
+		
+		String queryGetSaltAndPass = "SELECT salt, password from login where phone='"+ userphone + "'";
+		//System.out.println(queryGetSaltAndPass);
+		String saltFromDB = null;
+		String passHashedFromDB = null;
+		try {
+			rs=doQuery(conn, queryGetSaltAndPass);
+			while (rs.next()){
+				saltFromDB = rs.getString("salt");
+				passHashedFromDB = rs.getString("password");
+			}
+		} catch (SQLException e) {
+			System.err.println("Failed to retrieve salt and pass " + e);
+			return false;
+		}
+		
+		//could not retrieve db's salt, ergo login failed
+		if(saltFromDB==null) {
+			System.err.println("Login failed");
+			return false;
+		}
+		
+		//Hash user's input with salt from db
+		String userPassHashed = hashPassword(userpass.toCharArray(), ToByteArray(saltFromDB));
+		
+		//Result compare
+		System.out.println(userPassHashed.equals(passHashedFromDB));
+    	conn.close();
+		return true;
+	}
+	
 	
 }

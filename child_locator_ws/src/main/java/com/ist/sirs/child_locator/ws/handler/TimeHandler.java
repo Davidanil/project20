@@ -51,7 +51,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		try {
-			if (outboundElement.booleanValue()) {
+			if (outboundElement.booleanValue()) { // Add time stamp header
 				System.out.println("Writing header in outbound SOAP message...");
 
 				// get SOAP envelope
@@ -74,7 +74,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				String valueString = time.toString();
 				element.addTextNode(valueString);
 			}
-			else{
+			else{ // Check time stamp
 				System.out.println("Reading header in inbound SOAP message...");
 
 				// get SOAP envelope header

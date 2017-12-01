@@ -81,9 +81,9 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		
 		if (outbound){	// Add Hash
-			AddHeader(smc, hash.toString());
+			AddHeader(smc, Arrays.toString(hash));
 		}
-		else if(!CompareHash(smc, hash.toString())){ // Compare hash
+		else if(!CompareHash(smc, Arrays.toString(hash))){ // Compare hash
 			throw new RuntimeException(String.format("Message hashes don't match.")); // Error
 		}
 	}

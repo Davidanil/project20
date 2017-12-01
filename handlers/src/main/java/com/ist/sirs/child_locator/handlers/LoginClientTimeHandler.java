@@ -1,10 +1,13 @@
-package com.ist.sirs.child_locator.ws.handler;
+package com.ist.sirs.child_locator.handlers;
 
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Set;
 
 import javax.xml.namespace.QName;
 import javax.xml.soap.Name;
+import javax.xml.soap.Node;
+import javax.xml.soap.SOAPBody;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPHeader;
@@ -16,16 +19,18 @@ import javax.xml.ws.handler.MessageContext.Scope;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
+import org.w3c.dom.NodeList;
+
+import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
+public class LoginClientTimeHandler implements SOAPHandler<SOAPMessageContext> {
 	
-	public static final String HandlerName = "TimeHeader";
-	public static final String HandlerPrefix = "T";
-	public static final String HandlerNamespace = "http://demo";
+	public static final String HandlerName = "register";
+	public static final String HandlerPrefix = "ns2";
+	public static final String HandlerNamespace = "http://ws.child_locator.sirs.ist.com/";
 
-	
-	public static final String CONTEXT_PROPERTY = "time.property";
+	public static final String CONTEXT_PROPERTY = "login_time.property";
 
 	//
 	// Handler interface implementation
@@ -58,7 +63,8 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				SOAPMessage msg = smc.getMessage();
 				SOAPPart sp = msg.getSOAPPart();
 				SOAPEnvelope se = sp.getEnvelope();
-
+				SOAPBody sb = msg.getSOAPBody();
+				
 				// add header
 				SOAPHeader sh = se.getHeader();
 				if (sh == null)
@@ -66,53 +72,33 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// add header element (name, namespace prefix, namespace)
 				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
-				SOAPHeaderElement element = sh.addHeaderElement(name);
-
-				// add header element value
-
-				LocalDateTime time = LocalDateTime.now();
-				String valueString = time.toString();
-				element.addTextNode(valueString);
-			}
-			else{
-				System.out.println("Reading header in inbound SOAP message...");
-
-				// get SOAP envelope header
-				SOAPMessage msg = smc.getMessage();
-				SOAPPart sp = msg.getSOAPPart();
-				SOAPEnvelope se = sp.getEnvelope();
-				SOAPHeader sh = se.getHeader();
-
-				// check header
-				if (sh == null) {
-					System.out.println("Header not found.");
-					return true;
-				}
-
-				// get first header element
-				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
-				Iterator<?> it = sh.getChildElements(name);
-				// check header element
-				if (!it.hasNext()) {
-					System.out.println("Header element not found.");
-					return true;
-				}
-				SOAPElement element = (SOAPElement) it.next();
-
-				// get header element value
-				String valueString = element.getValue();
-            
-				// put header in a property context
-				smc.put(CONTEXT_PROPERTY, valueString);
-				// set property scope to application client/server class can
-				// access it
-				smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
 				
-				LocalDateTime messagetime = LocalDateTime.parse(valueString);
-				if(messagetime.plusSeconds(0).isBefore( LocalDateTime.now() ) ) // time > 3 sec, error
-				   throw new RuntimeException("Time exceeded 3 seconds.");
-            
+				//if register method was found
+				Iterator<?> itr=sb.getChildElements(name);
+				if(itr.hasNext()){
+					// get phoneNumber from SOAP Body
+					Node n = (Node) itr.next();
+					NodeList nList = n.getChildNodes();
+					String phoneNumber = "";
+					int indexNode = 0;
+					for(int i = 0; i < nList.getLength(); i++){
+						if(nList.item(i).getNodeName().equals("phoneNumber")){
+							phoneNumber = nList.item(i).getTextContent();
+							indexNode = i;
+						}
+					}
+					
+					if(phoneNumber.length() > 0){
+						//add it to header
+						Name namePhone = se.createName("phoneNumber", "n", "http://phoneNumber");
+						SOAPHeaderElement element = sh.addHeaderElement(namePhone);
+						element.addTextNode(phoneNumber);
+					}
+				}
+				
+			
 			}
+			
 		} catch (Exception e) {
 			System.out.print("Caught exception in TimeHandler: ");
 			System.out.println(e);

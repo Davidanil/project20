@@ -2,20 +2,11 @@
 
 <handler-chains xmlns="http://java.sun.com/xml/ns/javaee">
     <handler-chain>
-        <!--handler>
-            <handler-class>org.komparator.security.handler.LoggingHandler</handler-class>
-        </handler-->
-<!--         <handler> -->
-<!--             <handler-class>org.komparator.security.handler.AtMostOnceHandler</handler-class> -->
-<!--         </handler> -->
-<!--         <handler> -->
-<!--             <handler-class>org.komparator.security.handler.HeaderCCNumberHandler</handler-class> -->
-<!--         </handler> -->
         <handler>
-            <handler-class>com.ist.sirs.child_locator.ws.handler.LoggingHandler</handler-class>
+            <handler-class>com.ist.sirs.child_locator.handlers.TimeHandler</handler-class>
         </handler>
         <handler>
-            <handler-class>com.ist.sirs.child_locator.ws.handler.TimeHandler</handler-class>
+            <handler-class>com.ist.sirs.child_locator.handlers.LoggingHandler</handler-class>
         </handler>
     </handler-chain>
 </handler-chains>

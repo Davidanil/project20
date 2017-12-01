@@ -1,5 +1,5 @@
 <!DOCTYPE doc [
-<!ENTITY handlerChain SYSTEM "MediatorPortImpl_handler.xml">
+<!ENTITY handlerChain SYSTEM "ChildLocatorPortImpl_handler.xml">
 ]>
 <jaxws:bindings
     xmlns:jaxws="http://java.sun.com/xml/ns/jaxws"

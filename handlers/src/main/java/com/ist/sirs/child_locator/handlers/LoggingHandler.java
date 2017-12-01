@@ -1,4 +1,4 @@
-package com.ist.sirs.child_locator.ws.handler;
+package com.ist.sirs.child_locator.handlers;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletResponse;
+
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
@@ -53,15 +53,7 @@ public class LoggingHandler implements SOAPHandler<SOAPMessageContext> {
 
         if (outbound) {
         	System.out.println("\nOutbound message:");
-              //this is underlying http response object
-              HttpServletResponse response = (HttpServletResponse) smc.get(MessageContext.SERVLET_RESPONSE);
-
-                response.addHeader("Access-Control-Allow-Origin", "*");
-                response.addHeader("Access-Control-Allow-Credentials", "false");
-                response.addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE");
-                response.setHeader("Access-Control-Max-Age", "3600");
-                response.addHeader("Access-Control-Allow-Headers", "Origin, Accept, x-requested-with, Content-Type, SOAPAction, Access-Control-Allow-Headers, Access-Control-Response-Headers, Access-Control-Allow-Methods, Access-Control-Allow-Origin");
-              
+            
         } else {
         	System.out.println("\nInbound message:");
         }

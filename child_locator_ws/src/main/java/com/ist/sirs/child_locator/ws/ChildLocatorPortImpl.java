@@ -14,7 +14,7 @@ import javax.jws.WebService;
 import com.ist.sirs.child_locator.ws.db.ChildLocatorDB;
 
 @WebService(endpointInterface = "com.ist.sirs.child_locator.ws.ChildLocatorPortType", wsdlLocation = "childLocator.1_0.wsdl", name = "ChildLocatorService", portName = "ChildLocatorPort", targetNamespace = "http://ws.child_locator.sirs.ist.com/", serviceName = "ChildLocatorService")
-// @HandlerChain(file="/child_locator_ws_handler_chain.xml")
+@HandlerChain(file="/child_locator_ws_handler_chain.xml")
 public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	private static final int PASSNUMMIN = 8;
 	private static final int PASSNUMMAX = 32;

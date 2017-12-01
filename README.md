@@ -21,8 +21,6 @@ Edited on 30/11/2017:
 
 ### ToDo:
 * Secure channels - (server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)
-* ~Add TimeHandler to Client~
-* ~Add IntegrityHandler to Client~
 * Last location of child (saved locally)
 * Tracking
 * Register/Add device (nonces )

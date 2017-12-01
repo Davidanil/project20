@@ -9,7 +9,8 @@
 			</handler-class>
 		</handler>
 		<handler>
-            		<handler-class>com.ist.sirs.child_locator.handlers.IntegrityHandler</handler-class>
+            		<handler-class>com.ist.sirs.child_locator.handlers.IntegrityHandler
+			</handler-class>
         	</handler>
 		<handler>
 			<handler-class>com.ist.sirs.child_locator.handlers.LoggingHandler

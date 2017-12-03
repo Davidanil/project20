@@ -20,9 +20,31 @@ Edited on 30/11/2017:
 	
 
 ### ToDo:
-* Secure channels - (server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)
-* Last location of child (saved locally)
-* Tracking
-* Register/Add device (nonces )
-* 2factor authentication / reauthentication
-* certificates
+
+<table>
+	<tr>
+	<th>Kevin</th>
+	<th>David</th>
+	<th>Guilherme</th>
+	</tr>
+  <tr>
+	  <td><s>Last Location</s></td>
+    <td>Tracking</td>
+	<td>Secure channels (1)</td>
+  </tr>
+  <tr>
+    <td colspan="2">Nonces (register/add devices)</td>
+	<td>Message Hashes</td>
+  </tr>
+  <tr>
+    <td colspan="3">2factor authentication / reauthentication</td>
+  </tr>
+  <tr>
+    <td colspan="3">certificates</td>
+  </tr>
+</table>
+(1) - server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica
+
+
+* A cada tentativa falhada, incrementar "attempts" na DB, com login bem sucedido meter a 0.
+* Tratar do verified (como simular isto?)

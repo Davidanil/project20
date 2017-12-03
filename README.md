@@ -30,7 +30,7 @@ Edited on 30/11/2017:
   <tr>
 	  <td><s>Last Location</s></td>
     <td>Tracking</td>
-	<td>Secure channels*</td>
+	<td>Secure channels (1)</td>
   </tr>
   <tr>
     <td colspan="2">Nonces (register/add devices)</td>
@@ -43,5 +43,8 @@ Edited on 30/11/2017:
     <td colspan="3">certificates</td>
   </tr>
 </table>
+(1) - server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica
 
-*(server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)
+
+* A cada tentativa falhada, incrementar "attempts" na DB, com login bem sucedido meter a 0.
+* Tratar do verified (como simular isto?)

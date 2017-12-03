@@ -28,7 +28,7 @@ Edited on 30/11/2017:
 	<th>Guilherme</th>
 	</tr>
   <tr>
-    <td>Last Location</td>
+	  <td><s>Last Location</s></td>
     <td>Tracking</td>
 	<td>Secure channels*</td>
   </tr>

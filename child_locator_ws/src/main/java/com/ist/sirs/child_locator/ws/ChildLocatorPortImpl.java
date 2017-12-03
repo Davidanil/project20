@@ -4,8 +4,10 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -77,6 +79,28 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		
 		return false;	
 	}
+	
+	@Override
+	public List<FolloweeView> getFollowees(){
+		MessageContext messageContext = webServiceContext.getMessageContext();
+
+		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
+		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
+	
+		String phoneNumber = id1.length() > 0 ? id1 : id2;
+		
+		List<String> followees = db.getFollowees(phoneNumber);
+		List<FolloweeView> followeesList = new ArrayList<FolloweeView>();
+		for (String followee : followees) {
+			FolloweeView fv = new FolloweeView();
+			fv.setPhoneNumber(followee);
+			followeesList.add(fv);
+		}
+		
+		return followeesList;
+		
+	}
+	
 	
 	//true - no need to re-login
 	//false - force client to re-login

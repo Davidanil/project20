@@ -6,10 +6,12 @@ import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ist.sirs.child_locator.ws.FolloweeView;
 import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
 
 public class ChildLocatorClientApp {
@@ -36,7 +38,7 @@ public class ChildLocatorClientApp {
 		Scanner scanner = new Scanner(System.in);
 		String pin;
 		boolean loop = true;
-		
+
 		clearScreen();
 		System.out.println("[CREATE PIN]");
 		System.out.println("Since its the first time you execute this app, choose a 4-8 digit Pin:");
@@ -66,7 +68,7 @@ public class ChildLocatorClientApp {
 				System.out.println("Exception: " + e.getMessage());
 			}
 		}
-		
+
 		scanner.close();
 	}
 
@@ -102,30 +104,31 @@ public class ChildLocatorClientApp {
 					loop = false;
 				} else {
 					failedAttempts++;
-					
-					if(failedAttempts > 3){
+
+					if (failedAttempts > 3) {
 						try {
 							// wait e^(failedAttempts) minutes
 							double minutesToSleep = Math.pow(Math.E, failedAttempts);
 							int millisToSleep = (int) minutesToSleep * 60 * 1000;
- 							System.out.format("This is your %d attempt, so youll have to wait %f minutes "
- 									+ "before retrying.\n", failedAttempts, minutesToSleep);
-						    Thread.sleep(millisToSleep);
-						} catch(InterruptedException ex) {
-						    Thread.currentThread().interrupt();
-						    System.out.println("Exception: " + ex.getMessage());
+							System.out.format(
+									"This is your %d attempt, so youll have to wait %f minutes " + "before retrying.\n",
+									failedAttempts, minutesToSleep);
+							Thread.sleep(millisToSleep);
+						} catch (InterruptedException ex) {
+							Thread.currentThread().interrupt();
+							System.out.println("Exception: " + ex.getMessage());
 						}
 					}
-					
+
 					System.out.println("Pin incorrect, try again.");
 
 				}
 
 			} catch (Exception e) {
 				System.out.println("Exception: " + e.getMessage());
-			} 
+			}
 		}
-		
+
 		scanner.close();
 	}
 
@@ -133,7 +136,7 @@ public class ChildLocatorClientApp {
 		Scanner scanner = new Scanner(System.in);
 		String option;
 		boolean loop = true;
-		
+
 		clearScreen();
 		System.out.println("[FIRST MENU]");
 		System.out.println("What do you want to do?");
@@ -164,29 +167,30 @@ public class ChildLocatorClientApp {
 				System.out.println("[First Menu] Exception: " + e.getMessage());
 			}
 		}
-		
+
 		scanner.close();
 
 	}
-	
-	public static void login(){
+
+	public static void login() {
 		login("");
 	}
+
 	public static void login(String exceptionMessage) {
 		Scanner scanner = new Scanner(System.in);
 		String phoneNumber, email, password;
 		boolean loop = true;
-		
+
 		clearScreen();
 		System.out.println("[LOGIN]");
-		
-		if(exceptionMessage != null && exceptionMessage.length() > 0)
+
+		if (exceptionMessage != null && exceptionMessage.length() > 0)
 			System.out.println(exceptionMessage);
-		
+
 		System.out.println("Provide your info:");
 
 		while (loop) {
-			
+
 			try {
 				System.out.print("Phone Number: ");
 				phoneNumber = scanner.next();
@@ -199,15 +203,14 @@ public class ChildLocatorClientApp {
 				if (client.login(phoneNumber, email, password)) {
 					loop = false;
 					mainMenu();
-				}
-				else
+				} else
 					System.out.println("Wrong info, try again.");
 
 			} catch (Exception e) {
 				System.out.println("[Login] Exception: " + e.getMessage());
 			}
 		}
-		
+
 		scanner.close();
 	}
 
@@ -229,17 +232,16 @@ public class ChildLocatorClientApp {
 				password1 = scanner.next();
 				System.out.print("Repeat password: ");
 				password2 = scanner.next();
-				 if (client.register(phone,email, password1, password2)) {
-					 loop = false;
-					 mainMenu();
-				 }
-				 else
-					 System.out.println("Wrong info, try again:");
+				if (client.register(phone, email, password1, password2)) {
+					loop = false;
+					mainMenu();
+				} else
+					System.out.println("Wrong info, try again:");
 			} catch (Exception e) {
 				System.out.println("[Register] Exception: " + e.getMessage());
 			}
 		}
-		
+
 		scanner.close();
 	}
 
@@ -247,7 +249,7 @@ public class ChildLocatorClientApp {
 		Scanner scanner = new Scanner(System.in);
 		String option;
 		boolean loop = true;
-		
+
 		System.out.println("What do you want to do?");
 		while (loop) {
 			System.out.println("\t1 - Check followees");
@@ -262,11 +264,11 @@ public class ChildLocatorClientApp {
 				switch (option) {
 				case "1":
 					loop = false;
-					checkFollowees();
+					getFollowees();
 					break;
 				case "2":
 					loop = false;
-					checkFollowers();
+					getFollowers();
 					break;
 				case "3":
 					loop = false;
@@ -290,12 +292,50 @@ public class ChildLocatorClientApp {
 		scanner.close();
 	}
 
-	public static void checkFollowees() {
-
+	public static void getFollowees() {
+		List<FolloweeView> followees = client.getFollowees();
+		
+		clearScreen();
+		System.out.println("[CHECK FOLLOWEES]");
+		System.out.println("List of people you are following");
+		for(int i = 0; i < followees.size(); i++){
+			System.out.println("\t" + (i+1) + " - " + followees.get(i).getPhoneNumber());
+		}
+		
+		Scanner scanner = new Scanner(System.in);
+		String option;
+		boolean loop = true;
+		
+		System.out.print("Which one you want to watch? ");
+		while (loop) {
+			try {
+				option = scanner.next();
+				Pattern pattern = Pattern.compile("^\\d$");
+				Matcher matcher = pattern.matcher(option);
+				
+				//if its a number
+				if (matcher.find()){
+					int optInt = Integer.valueOf(option);
+					if(optInt > 0 && optInt <= followees.size()){
+						loop = false;
+						checkFollowee(followees.get(optInt-1).getPhoneNumber());
+					}
+				}
+				
+			} catch (Exception e) {
+				System.out.println("[Main Menu] Exception: " + e.getMessage());
+			}
+		}
 	}
 
-	public static void checkFollowers() {
+	public static void getFollowers() {
 
+	}
+	
+	public static void checkFollowee(String phoneNumber){
+		clearScreen();
+		
+		System.out.println("BAZINGA");
 	}
 
 	public static void addFollower() {

@@ -9,7 +9,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -136,6 +138,24 @@ public class ChildLocatorDB {
 			System.out.println("[DB - getLoginTime] Exception - " + e.getMessage());
 		}
 		return time;
+	}
+	
+	public List<String> getFollowees(String phoneNumber){
+		List<String> phoneNumbers = new ArrayList<String>();
+		try {
+			PreparedStatement stmt = connection.prepareStatement("SELECT phone2 FROM connected WHERE phone=?");
+			stmt.setString(1, phoneNumber);
+			ResultSet rs = stmt.executeQuery();
+
+			while(rs.next()){
+				phoneNumbers.add(rs.getString("phone2"));
+			}
+
+		} catch (SQLException e) {
+			System.out.println("[DB - getFollowees] Exception - " + e.getMessage());
+		}
+		
+		return phoneNumbers;
 	}
 
 	// Print login table

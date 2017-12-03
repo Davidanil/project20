@@ -10,6 +10,8 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
+
 public class ChildLocatorClientApp {
 	public static ChildLocatorClient client = null;
 
@@ -149,29 +151,38 @@ public class ChildLocatorClientApp {
 				case "1":
 					login();
 					loop = false;
+					break;
 				case "2":
 					register();
 					loop = false;
+					break;
 				default:
 					System.out.println("Invalid option, try again:");
 					break;
 				}
 			} catch (Exception e) {
-				System.out.println("Exception: " + e.getMessage());
+				System.out.println("[First Menu] Exception: " + e.getMessage());
 			}
 		}
 		
 		scanner.close();
 
 	}
-
-	public static void login() {
+	
+	public static void login(){
+		login("");
+	}
+	public static void login(String exceptionMessage) {
 		Scanner scanner = new Scanner(System.in);
 		String phoneNumber, email, password;
 		boolean loop = true;
 		
 		clearScreen();
 		System.out.println("[LOGIN]");
+		
+		if(exceptionMessage != null && exceptionMessage.length() > 0)
+			System.out.println(exceptionMessage);
+		
 		System.out.println("Provide your info:");
 
 		while (loop) {
@@ -186,14 +197,14 @@ public class ChildLocatorClientApp {
 
 				// TODO: check if user can login (e^c)
 				if (client.login(phoneNumber, email, password)) {
-					mainMenu();
 					loop = false;
+					mainMenu();
 				}
 				else
 					System.out.println("Wrong info, try again.");
 
 			} catch (Exception e) {
-				System.out.println("Exception: " + e.getMessage());
+				System.out.println("[Login] Exception: " + e.getMessage());
 			}
 		}
 		
@@ -202,7 +213,7 @@ public class ChildLocatorClientApp {
 
 	public static void register() {
 		Scanner scanner = new Scanner(System.in);
-		String phone, email, password;
+		String phone, email, password1, password2;
 		boolean loop = true;
 
 		clearScreen();
@@ -215,15 +226,17 @@ public class ChildLocatorClientApp {
 				System.out.print("Email: ");
 				email = scanner.next();
 				System.out.print("Password: ");
-				password = scanner.next();
-
-				// TODO: Check if register was successful
-				// if (client.register(phone,email, password)) {
-				// mainViewInterface();
-				// loop = false;
-				// }
+				password1 = scanner.next();
+				System.out.print("Repeat password: ");
+				password2 = scanner.next();
+				 if (client.register(phone,email, password1, password2)) {
+					 loop = false;
+					 mainMenu();
+				 }
+				 else
+					 System.out.println("Wrong info, try again:");
 			} catch (Exception e) {
-				System.out.println("Exception: " + e.getMessage());
+				System.out.println("[Register] Exception: " + e.getMessage());
 			}
 		}
 		
@@ -240,6 +253,7 @@ public class ChildLocatorClientApp {
 			System.out.println("\t1 - Check followees");
 			System.out.println("\t2 - Check followers");
 			System.out.println("\t3 - Add new follower");
+			System.out.println("\t4 - Print");
 			System.out.print("Number of the option:");
 
 			try {
@@ -247,20 +261,30 @@ public class ChildLocatorClientApp {
 
 				switch (option) {
 				case "1":
+					loop = false;
 					checkFollowees();
-					loop = false;
+					break;
 				case "2":
+					loop = false;
 					checkFollowers();
-					loop = false;
+					break;
 				case "3":
-					addFollower();
 					loop = false;
+					addFollower();
+					break;
+				case "4":
+					loop = false;
+					client.print();
+					break;
 				default:
 					System.out.println("Invalid login, try again:");
 					break;
 				}
+			} catch (InvalidLoginTime_Exception e) {
+				loop = false;
+				login(e.getMessage());
 			} catch (Exception e) {
-				System.out.println("Exception: " + e.getMessage());
+				System.out.println("[Main Menu] Exception: " + e.getMessage());
 			}
 		}
 		scanner.close();

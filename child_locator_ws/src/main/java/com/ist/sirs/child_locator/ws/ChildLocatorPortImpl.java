@@ -3,14 +3,23 @@ package com.ist.sirs.child_locator.ws;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Resource;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.jws.HandlerChain;
 import javax.jws.WebService;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
 
+import com.ist.sirs.child_locator.handlers.IdHandler;
+import com.ist.sirs.child_locator.handlers.LoginRegisterIdHandler;
+import com.ist.sirs.child_locator.handlers.TimeHandler;
 import com.ist.sirs.child_locator.ws.db.ChildLocatorDB;
 
 @WebService(endpointInterface = "com.ist.sirs.child_locator.ws.ChildLocatorPortType", wsdlLocation = "childLocator.1_0.wsdl", name = "ChildLocatorService", portName = "ChildLocatorPort", targetNamespace = "http://ws.child_locator.sirs.ist.com/", serviceName = "ChildLocatorService")
@@ -18,6 +27,9 @@ import com.ist.sirs.child_locator.ws.db.ChildLocatorDB;
 public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	private static final int PASSNUMMIN = 8;
 	private static final int PASSNUMMAX = 32;
+	
+	@Resource
+	private WebServiceContext webServiceContext;
 	
 	private ChildLocatorDB db;
 
@@ -36,15 +48,19 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	// -------------- SERVICE METHODS --------------
 
 	@Override
-	public String print() {
+	public String print() throws InvalidLoginTime_Exception{
+		if(!validLoginTime())
+			throwInvalidLoginTimeException("Your last login was over a day ago, you need to re-login.");
 		return "bazinga";
 	}
 
 	@Override
 	public boolean login(String phoneNumber, String email, String password) {
 		if(isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)){
-			//String passwordHash = TODO
-			return db.login(email,password);
+			//salt and hash password
+			String salt = db.getSalt(phoneNumber);
+			byte[] hashedPassword = hashPassword(password, ToByteArray(salt));
+			return db.login(email,toHexString(hashedPassword));
 		}
 		
 		return false;
@@ -60,6 +76,32 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		}
 		
 		return false;	
+	}
+	
+	//true - no need to re-login
+	//false - force client to re-login
+	public boolean validLoginTime(){
+		MessageContext messageContext = webServiceContext.getMessageContext();
+
+		Timestamp time = (Timestamp) messageContext.get(TimeHandler.CONTEXT_PROPERTY);
+		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
+		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
+		
+		String phoneNumber = id1.length() > 0 ? id1 : id2;
+		
+		if(isPhoneNumber(phoneNumber)){
+			Timestamp lastLogin = db.getLoginTime(phoneNumber);
+			
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(lastLogin);
+			cal.add(Calendar.DAY_OF_WEEK, 1);
+			lastLogin = new Timestamp(cal.getTime().getTime());
+			
+			boolean validLoginTime = time.before(lastLogin);
+			
+			return validLoginTime;
+		}
+		return false;
 	}
 
 	// --------------- AUX METHODS -----------------
@@ -161,6 +203,13 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	                             + Character.digit(s.charAt(i+1), 16));
 	    }
 	    return data;
+	}
+	
+	/** Helper method to throw new InvalidTimeException exception */
+	private void throwInvalidLoginTimeException(final String message) throws InvalidLoginTime_Exception{
+		InvalidLoginTime faultInfo = new InvalidLoginTime();
+		faultInfo.setMessage(message);
+		throw new InvalidLoginTime_Exception(message, faultInfo);
 	}
 
 }

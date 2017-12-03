@@ -14,7 +14,6 @@ import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
@@ -49,33 +48,59 @@ public class ChildLocatorDB {
 
 		return rs;
 	}
-	
-	public boolean login(String email, String passwordHash){
+
+	public boolean login(String email, String passwordHash) {
 		try {
-		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE email=? AND password=?");
-		stmt.setString(1, email);
-		stmt.setString(2, passwordHash);
-		ResultSet rs = stmt.executeQuery();
-		
-		return rs.next();
-		
+			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE email=? AND password=?");
+			stmt.setString(1, email);
+			stmt.setString(2, passwordHash);
+			ResultSet rs = stmt.executeQuery();
+			boolean hasNext = rs.next();
+			
+			if(hasNext){
+				PreparedStatement stmt2 = connection.prepareStatement("UPDATE login SET lastlogin=? WHERE email=?");
+				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+				stmt2.setTimestamp(1, timestamp);
+				stmt2.setString(2, email);
+				stmt2.executeUpdate();
+			}
+
+			return hasNext;
+
 		} catch (SQLException e) {
+			System.err.print(e.getMessage());
 			return false;
 		}
 	}
-	
-	public boolean register(String phoneNumber, String email, String salt, String hash){
+
+	public String getSalt(String phoneNumber) {
+		String salt = "";
+		try {
+			PreparedStatement stmt = connection.prepareStatement("SELECT salt FROM login WHERE phone=?");
+			stmt.setString(1, phoneNumber);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+				salt = rs.getString("salt");
+
+		} catch (SQLException e) {
+			System.out.println("[DB - getSalt] Exception - " + e.getMessage());
+		}
+		return salt;
+	}
+
+	public boolean register(String phoneNumber, String email, String salt, String hash) {
 		try {
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
 			stmt.setString(1, phoneNumber);
 			ResultSet rs = stmt.executeQuery();
-			
-			//user is already registered
-			if(rs.next())
+
+			// user is already registered
+			if (rs.next())
 				return false;
-			
-			stmt = connection.prepareStatement("INSERT INTO login('phone','email','salt','password','lastlogin') "
-					+ "VALUES(?,?,?,?,?)");
+
+			stmt = connection
+					.prepareStatement("INSERT INTO login (phone,email,salt,password,lastlogin) " + "VALUES(?,?,?,?,?)");
 			Date date = new Date();
 			Timestamp ts = new Timestamp(date.getTime());
 			stmt.setString(1, phoneNumber);
@@ -84,16 +109,33 @@ public class ChildLocatorDB {
 			stmt.setString(4, hash);
 			stmt.setTimestamp(5, ts);
 			int count = stmt.executeUpdate();
-			
-			//successful insert
-			if(count > 0)
+
+			// successful insert
+			if (count > 0)
 				return true;
 			else
 				return false;
-			
-			} catch (SQLException e) {
-				return false;
-			}
+
+		} catch (SQLException e) {
+			System.err.println(e.getMessage());
+			return false;
+		}
+	}
+
+	public Timestamp getLoginTime(String phoneNumber) {
+		Timestamp time = null;
+		try {
+			PreparedStatement stmt = connection.prepareStatement("SELECT lastlogin FROM login WHERE phone=?");
+			stmt.setString(1, phoneNumber);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next())
+				time = rs.getTimestamp("lastlogin");
+
+		} catch (SQLException e) {
+			System.out.println("[DB - getLoginTime] Exception - " + e.getMessage());
+		}
+		return time;
 	}
 
 	// Print login table

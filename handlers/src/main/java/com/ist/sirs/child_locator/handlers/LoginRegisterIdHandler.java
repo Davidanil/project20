@@ -24,10 +24,9 @@ import org.w3c.dom.NodeList;
 import java.io.IOException;
 import java.time.LocalDateTime;
 
-public class LoginServerTimeHandler implements SOAPHandler<SOAPMessageContext> {
+public class LoginRegisterIdHandler implements SOAPHandler<SOAPMessageContext> {
 
 	public static final String CONTEXT_PROPERTY = "login_time.property";
-
 	
 	private String phoneNumber = "";
 	//
@@ -49,33 +48,79 @@ public class LoginServerTimeHandler implements SOAPHandler<SOAPMessageContext> {
 	 */
 	@Override
 	public boolean handleMessage(SOAPMessageContext smc) {
-		System.out.println("TimeHandler: Handling message.");
+		//System.out.println("LoginRegisterIdHandler: Handling message.");
 
 		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		try {
 			if (outboundElement.booleanValue()) {
-//				SOAPMessage msg = smc.getMessage();
-//				SOAPPart sp = msg.getSOAPPart();
-//				SOAPEnvelope se = sp.getEnvelope();
-//
-//				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
-//
-//				// if register method was found
-//				Iterator<?> itr = sb.getChildElements(name);
-//				if (itr.hasNext()) {
-//					// get phoneNumber from SOAP Body
-//					Node n = (Node) itr.next();
-//					NodeList nList = n.getChildNodes();
-//					String phoneNumber = "";
-//					int indexNode = 0;
-//					for (int i = 0; i < nList.getLength(); i++) {
-//						if (nList.item(i).getNodeName().equals("phoneNumber")) {
-//							phoneNumber = nList.item(i).getTextContent();
-//							indexNode = i;
-//						}
-//					}
-//				}
+				SOAPMessage msg = smc.getMessage();
+				SOAPPart sp = msg.getSOAPPart();
+				SOAPEnvelope se = sp.getEnvelope();
+				SOAPBody sb = msg.getSOAPBody();
+				
+				// add header
+				SOAPHeader sh = se.getHeader();
+				if (sh == null)
+					sh = se.addHeader();
+
+				// if register method was found
+				Name nameRegister = se.createName("registerResponse", "ns2", "http://ws.child_locator.sirs.ist.com/");
+				Iterator<?> itrRegister = sb.getChildElements(nameRegister);
+				if (itrRegister.hasNext()) {
+					// get phoneNumber from SOAP Body
+					Node n = (Node) itrRegister.next();
+					NodeList nList = n.getChildNodes();
+					boolean returnValue = false;
+					
+					for (int i = 0; i < nList.getLength(); i++) {
+						if (nList.item(i).getNodeName().equals("return")) {
+							String returnValStr = nList.item(i).getTextContent();
+							returnValue = returnValStr.equals("true") ? true : false;
+						}
+					}
+					if(returnValue){
+						//add phoneNumber to header
+						//System.err.println("[OUTBOUND] PHONE NUMBER: " + this.phoneNumber);
+						
+						// add header element (name, namespace prefix, namespace)
+						Name name = se.createName("phoneNumber", "ph", "http://bazinga");
+						SOAPHeaderElement element = sh.addHeaderElement(name);
+						// add header element value
+						element.addTextNode(phoneNumber);
+						
+						return true;
+					}
+				}
+				
+				//if user is trying to login
+				Name nameLogin = se.createName("loginResponse", "ns2", "http://ws.child_locator.sirs.ist.com/");
+				Iterator<?> itrLogin = sb.getChildElements(nameLogin);
+				if (itrLogin.hasNext()) {
+					// get phoneNumber from SOAP Body
+					Node n = (Node) itrLogin.next();
+					NodeList nList = n.getChildNodes();
+					boolean returnValue = false;
+
+					for (int i = 0; i < nList.getLength(); i++) {
+						if (nList.item(i).getNodeName().equals("return")) {
+							String returnValStr = nList.item(i).getTextContent();
+							returnValue = returnValStr.equals("true") ? true : false;
+						}
+					}
+					if(returnValue){
+						//add phoneNumber to header
+						//System.err.println("[OUTBOUND] PHONE NUMBER: " + this.phoneNumber);
+						
+						// add header element (name, namespace prefix, namespace)
+						Name name = se.createName("phoneNumber", "ph", "http://bazinga");
+						SOAPHeaderElement element = sh.addHeaderElement(name);
+						// add header element value
+						element.addTextNode(phoneNumber);
+						
+						return true;
+					}
+				}
 			} else {
 				SOAPMessage msg = smc.getMessage();
 				SOAPPart sp = msg.getSOAPPart();
@@ -89,17 +134,12 @@ public class LoginServerTimeHandler implements SOAPHandler<SOAPMessageContext> {
 					// get phoneNumber from SOAP Body
 					Node n = (Node) itrRegister.next();
 					NodeList nList = n.getChildNodes();
-					String phoneNumber = "";
 					int indexNode = 0;
 					for (int i = 0; i < nList.getLength(); i++) {
 						if (nList.item(i).getNodeName().equals("phoneNumber")) {
-							phoneNumber = nList.item(i).getTextContent();
+							this.phoneNumber = nList.item(i).getTextContent();
+							break;
 						}
-					}
-					if(phoneNumber.length() > 0){
-						System.err.println("PHONE NUMBER: " + phoneNumber);
-						this.phoneNumber = phoneNumber;
-						return true;
 					}
 				}
 				
@@ -110,23 +150,26 @@ public class LoginServerTimeHandler implements SOAPHandler<SOAPMessageContext> {
 					// get phoneNumber from SOAP Body
 					Node n = (Node) itrLogin.next();
 					NodeList nList = n.getChildNodes();
-					String phoneNumber = "";
+
 					int indexNode = 0;
 					for (int i = 0; i < nList.getLength(); i++) {
 						if (nList.item(i).getNodeName().equals("phoneNumber")) {
-							phoneNumber = nList.item(i).getTextContent();
+							this.phoneNumber = nList.item(i).getTextContent();
+							break;
 						}
-					}
-					if(phoneNumber.length() > 0){
-						System.err.println("PHONE NUMBER: " + phoneNumber);
-						this.phoneNumber = phoneNumber;
-						return true;
 					}
 				}
 				
+				
+				// put header in a property context
+				smc.put(CONTEXT_PROPERTY, this.phoneNumber);
+				// set property scope to application client/server class can
+				// access it
+				smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
+				
 			}
 		} catch (Exception e) {
-			System.out.print("Caught exception in TimeHandler: ");
+			System.out.print("Caught exception in LoginRegisterIdHandler: ");
 			System.out.println(e);
 			System.out.println("Continue normal processing...");
 		}

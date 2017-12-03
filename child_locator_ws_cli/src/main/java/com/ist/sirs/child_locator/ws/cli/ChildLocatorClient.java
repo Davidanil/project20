@@ -52,7 +52,7 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	
  // remote invocation methods ----------------------------------------------    
 	@Override
-    public String print() {
+    public String print() throws InvalidLoginTime_Exception{
 		return port.print();
 	}
 

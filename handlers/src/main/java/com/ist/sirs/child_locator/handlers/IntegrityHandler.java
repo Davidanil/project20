@@ -68,7 +68,7 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 
 	private void handleIntegrity(SOAPMessageContext smc) {
-		System.out.println("IntegrityHandler: Handling message.");
+		//System.out.println("IntegrityHandler: Handling message.");
 
 		byte[] message = null;
 		MessageDigest md = null;
@@ -127,7 +127,7 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 	
 	private boolean CompareHash(SOAPMessageContext smc, String hash){ // read hash from message, returns true if equal
-		System.out.println("Reading message hash.");
+		//System.out.println("Reading message hash.");
 		
 		SOAPMessage msg = smc.getMessage();
 		SOAPPart sp = msg.getSOAPPart();

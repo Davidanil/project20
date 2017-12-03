@@ -18,6 +18,10 @@ import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 
 public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
@@ -48,13 +52,13 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 	 */
 	@Override
 	public boolean handleMessage(SOAPMessageContext smc) {
-		System.out.println("TimeHandler: Handling message.");
+		//System.out.println("TimeHandler: Handling message.");
 
 		Boolean outboundElement = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 
 		try {
 			if (outboundElement.booleanValue()) { // Add time stamp header
-				System.out.println("Writing header in outbound SOAP message...");
+				//System.out.println("Writing header in outbound SOAP message...");
 
 				// get SOAP envelope
 				SOAPMessage msg = smc.getMessage();
@@ -72,12 +76,12 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// add header element value
 
-				LocalDateTime time = LocalDateTime.now();
-				String valueString = time.toString();
+				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+				String valueString = timestamp.toString();
 				element.addTextNode(valueString);
 			}
 			else{ // Check time stamp
-				System.out.println("Reading header in inbound SOAP message...");
+				//System.out.println("Reading header in inbound SOAP message...");
 
 				// get SOAP envelope header
 				SOAPMessage msg = smc.getMessage();
@@ -103,9 +107,10 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// get header element value
 				String valueString = element.getValue();
-            
+				
+				Timestamp timestamp = Timestamp.valueOf(valueString);
 				// put header in a property context
-				smc.put(CONTEXT_PROPERTY, valueString);
+				smc.put(CONTEXT_PROPERTY, timestamp);
 				// set property scope to application client/server class can
 				// access it
 				smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
@@ -114,13 +119,19 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				Properties prop = new Properties();
 				try{
 					prop.load(TimeHandler.class.getResourceAsStream("/config.properties"));
+					
 					seconds = Integer.parseInt(prop.getProperty("freshnessTimeout"));
 				} catch(IOException ioe){
 					System.out.println(ioe);
 				}
 				
-				LocalDateTime messagetime = LocalDateTime.parse(valueString);
-				if(messagetime.plusSeconds(seconds).isBefore( LocalDateTime.now() ) ) // time > X sec, error
+				//Add x seconds to timestamp
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(timestamp);
+				cal.add(Calendar.SECOND, seconds);
+				timestamp = new Timestamp(cal.getTime().getTime());
+				
+				if(timestamp.before(new Timestamp(System.currentTimeMillis()))) // time > X sec, error
 				   throw new RuntimeException(String.format("Time exceeded %d seconds.",seconds));
             
 			}

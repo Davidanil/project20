@@ -20,9 +20,28 @@ Edited on 30/11/2017:
 	
 
 ### ToDo:
-* Secure channels - (server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)
-* Last location of child (saved locally)
-* Tracking
-* Register/Add device (nonces )
-* 2factor authentication / reauthentication
-* certificates
+
+<table>
+	<tr>
+	<th>Kevin</th>
+	<th>David</th>
+	<th>Guilherme</th>
+	</tr>
+  <tr>
+    <td>Last Location</td>
+    <td>Tracking</td>
+	<td>Secure channels*</td>
+  </tr>
+  <tr>
+    <td colspan="2">Nonces (register/add devices)</td>
+	<td>Message Hashes</td>
+  </tr>
+  <tr>
+    <td colspan="3">2factor authentication / reauthentication</td>
+  </tr>
+  <tr>
+    <td colspan="3">certificates</td>
+  </tr>
+</table>
+
+*(server vai ter um Map<phoneNumber,SymetricKey> e comunicacao inicial entre client e server e feita com cifra assimetrica)

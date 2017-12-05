@@ -203,8 +203,8 @@ public class ChildLocatorClientApp {
 
 				// TODO: check if user can login (e^c)
 				if (client.login(phoneNumber, email, password)) {
-					loop = false;
 					mainMenu();
+					loop = false;
 				} else
 					System.out.println("Wrong info, try again.");
 
@@ -235,8 +235,8 @@ public class ChildLocatorClientApp {
 				System.out.print("Repeat password: ");
 				password2 = scanner.next();
 				if (client.register(phone, email, password1, password2)) {
-					loop = false;
 					mainMenu();
+					loop = false;
 				} else
 					System.out.println("Wrong info, try again:");
 			} catch (Exception e) {
@@ -259,7 +259,7 @@ public class ChildLocatorClientApp {
 			System.out.println("\t1 - Get followees");
 			System.out.println("\t2 - Get followers");
 			System.out.println("\t3 - Add new follower");
-			System.out.println("\t4 - Print");
+			System.out.println("\t4 - Add new followee");
 			System.out.print("Number of the option:");
 
 			try {
@@ -267,28 +267,25 @@ public class ChildLocatorClientApp {
 
 				switch (option) {
 				case "1":
-					loop = false;
 					getFollowees();
+					loop = false;
 					break;
 				case "2":
-					loop = false;
 					getFollowers();
+					loop = false;
 					break;
 				case "3":
-					loop = false;
 					addFollower();
+					loop = false;
 					break;
 				case "4":
+					addFollowee();
 					loop = false;
-					client.print();
 					break;
 				default:
 					System.out.println("Invalid login, try again:");
 					break;
 				}
-			} catch (InvalidLoginTime_Exception e) {
-				loop = false;
-				login(e.getMessage());
 			} catch (Exception e) {
 				System.out.println("[Main Menu] Exception: " + e.getMessage());
 			}
@@ -321,8 +318,8 @@ public class ChildLocatorClientApp {
 				if (matcher.find()) {
 					int optInt = Integer.valueOf(option);
 					if (optInt > 0 && optInt <= followees.size()) {
-						loop = false;
 						checkFollowee(followees.get(optInt - 1).getPhoneNumber());
+						loop = false;
 					}
 				}
 
@@ -357,12 +354,8 @@ public class ChildLocatorClientApp {
 				System.out.print("Follower Phone Number: ");
 				phoneNumber = scanner.next();
 
-				// check if numbers are valid
-				if (isPhoneNumber(phoneNumber)) {
-					loop = false;
-					displayNonce(phoneNumber);
-				} else
-					System.out.println("Invalid phone number, try again.");
+				displayNonce(phoneNumber);
+				loop = false;
 
 			} catch (Exception e) {
 				System.out.println("[Add Follower] Exception: " + e.getMessage());
@@ -381,11 +374,37 @@ public class ChildLocatorClientApp {
 			System.out.println("\t" + nonce);
 
 			System.in.read();
-		} catch (ConnectionAlreadyExists_Exception | IOException e) {
+		} catch (Exception e) {
 			System.out.print("[Display Nonce] Exception: " + e.getMessage());
 		}
 
 		mainMenu();
+	}
+	
+	public static void addFollowee() {
+		boolean loop = true;
+		String phoneNumber, nonce;
+		Scanner scanner = new Scanner(System.in);
+
+		clearScreen();
+		System.out.println("[ADD FOLLOWEE]");
+
+		while (loop) {
+			try {
+				System.out.print("Followee Phone Number: ");
+				phoneNumber = scanner.next();
+				System.out.print("Nonce: ");
+				nonce = scanner.next();
+
+				client.addFollowee(phoneNumber, nonce);
+				loop = false;
+
+			} catch (Exception e) {
+				System.out.println("[Add Follower] Exception: " + e.getMessage());
+			}
+		}
+
+		scanner.close();
 	}
 
 	public static void removeFollowee() {

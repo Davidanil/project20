@@ -15,7 +15,6 @@
 
 			<xs:element name="print" type="tns:print" />
 			<xs:element name="printResponse" type="tns:printResponse" />
-			<xs:element name="InvalidLoginTime" type="tns:InvalidLoginTime" />
 			<xs:element name="login" type="tns:login" />
 			<xs:element name="loginResponse" type="tns:loginResponse" />
 			<xs:element name="register" type="tns:register" />
@@ -24,21 +23,26 @@
 			<xs:element name="getFolloweesResponse" type="tns:getFolloweesResponse" />
 			<xs:element name="getAddNonce" type="tns:getAddNonce" />
 			<xs:element name="getAddNonceResponse" type="tns:getAddNonceResponse" />
+			<xs:element name="addFollowee" type="tns:addFollowee" />
+			<xs:element name="addFolloweeResponse" type="tns:addFolloweeResponse" />
+
+			<!-- SOAP FAULTS -->
+			<xs:element name="InvalidLoginTime" type="tns:InvalidLoginTime" />
 			<xs:element name="ConnectionAlreadyExists" type="tns:ConnectionAlreadyExists" />
+			<xs:element name="InvalidPhoneNumber" type="tns:InvalidPhoneNumber" />
+			<xs:element name="InvalidEmail" type="tns:InvalidEmail" />
+			<xs:element name="InvalidPassword" type="tns:InvalidPassword" />
+			<xs:element name="DifferentPasswords" type="tns:DifferentPasswords" />
+			<xs:element name="InvalidNonce" type="tns:InvalidNonce" />
+
+
 
 			<xs:complexType name="print">
 				<xs:sequence />
 			</xs:complexType>
-
 			<xs:complexType name="printResponse">
 				<xs:sequence>
 					<xs:element name="return" type="xs:string" minOccurs="0" />
-				</xs:sequence>
-			</xs:complexType>
-
-			<xs:complexType name="InvalidLoginTime">
-				<xs:sequence>
-					<xs:element name="message" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
 
@@ -55,6 +59,7 @@
 					<xs:element name="return" type="xs:boolean" />
 				</xs:sequence>
 			</xs:complexType>
+
 			<xs:complexType name="register">
 				<xs:sequence>
 					<xs:element name="phoneNumber" type="xs:string"
@@ -70,12 +75,6 @@
 				</xs:sequence>
 			</xs:complexType>
 
-			<xs:complexType name="followeeView">
-				<xs:sequence>
-					<xs:element name="phoneNumber" type="xs:string"
-						minOccurs="0" />
-				</xs:sequence>
-			</xs:complexType>
 			<xs:complexType name="getFollowees">
 				<xs:sequence />
 			</xs:complexType>
@@ -97,13 +96,68 @@
 					<xs:element name="return" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
+
+			<xs:complexType name="addFollowee">
+				<xs:sequence>
+					<xs:element name="phoneNumber" type="xs:string" minOccurs="0" />
+					<xs:element name="nonce" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="addFolloweeResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:boolean"/>
+				</xs:sequence>
+			</xs:complexType>
+
+			<!-- VIEWS -->
+			<xs:complexType name="followeeView">
+				<xs:sequence>
+					<xs:element name="phoneNumber" type="xs:string"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+
+			<!-- SOAP FAULT -->
+			<xs:complexType name="InvalidLoginTime">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
 			<xs:complexType name="ConnectionAlreadyExists">
 				<xs:sequence>
 					<xs:element name="message" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
+			<xs:complexType name="InvalidPhoneNumber">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="InvalidEmail">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="InvalidPassword">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="DifferentPasswords">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="InvalidNonce">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+
 		</xs:schema>
 	</types>
+
+
 
 	<message name="print">
 		<part name="print" element="tns:print" />
@@ -111,36 +165,65 @@
 	<message name="printResponse">
 		<part name="printResponse" element="tns:printResponse" />
 	</message>
-	<message name="InvalidLoginTime">
-		<part name="fault" element="tns:InvalidLoginTime" />
-	</message>
+
 	<message name="login">
 		<part name="login" element="tns:login" />
 	</message>
 	<message name="loginResponse">
 		<part name="loginResponse" element="tns:loginResponse" />
 	</message>
+
 	<message name="register">
 		<part name="register" element="tns:register" />
 	</message>
 	<message name="registerResponse">
 		<part name="registerResponse" element="tns:registerResponse" />
 	</message>
+
 	<message name="getFollowees">
 		<part name="getFollowees" element="tns:getFollowees" />
 	</message>
 	<message name="getFolloweesResponse">
 		<part name="getFolloweesResponse" element="tns:getFolloweesResponse" />
 	</message>
+
 	<message name="getAddNonce">
 		<part name="getAddNonce" element="tns:getAddNonce" />
 	</message>
 	<message name="getAddNonceResponse">
 		<part name="getAddNonceResponse" element="tns:getAddNonceResponse" />
 	</message>
+
+	<message name="addFollowee">
+		<part name="addFollowee" element="tns:addFollowee" />
+	</message>
+	<message name="addFolloweeResponse">
+		<part name="addFolloweeResponse" element="tns:addFolloweeResponse" />
+	</message>
+
+	<!-- SOAP FAULTS -->
+	<message name="InvalidLoginTime">
+		<part name="fault" element="tns:InvalidLoginTime" />
+	</message>
 	<message name="ConnectionAlreadyExists">
 		<part name="fault" element="tns:ConnectionAlreadyExists" />
 	</message>
+	<message name="InvalidPhoneNumber">
+		<part name="fault" element="tns:InvalidPhoneNumber" />
+	</message>
+	<message name="InvalidEmail">
+		<part name="fault" element="tns:InvalidEmail" />
+	</message>
+	<message name="InvalidPassword">
+		<part name="fault" element="tns:InvalidPassword" />
+	</message>
+	<message name="DifferentPasswords">
+		<part name="fault" element="tns:DifferentPasswords" />
+	</message>
+	<message name="InvalidNonce">
+		<part name="fault" element="tns:InvalidNonce" />
+	</message>
+
 
 	<portType name="ChildLocatorPortType">
 		<operation name="print">
@@ -151,10 +234,17 @@
 		<operation name="login">
 			<input name="login" message="tns:login" />
 			<output name="loginResponse" message="tns:loginResponse" />
+			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
+			<fault name="InvalidEmail" message="tns:InvalidEmail" />
+			<fault name="InvalidPassword" message="tns:InvalidPassword" />
 		</operation>
 		<operation name="register">
 			<input name="register" message="tns:register" />
 			<output name="registerResponse" message="tns:registerResponse" />
+			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
+			<fault name="InvalidEmail" message="tns:InvalidEmail" />
+			<fault name="InvalidPassword" message="tns:InvalidPassword" />
+			<fault name="DifferentPasswords" message="tns:DifferentPasswords" />
 		</operation>
 		<operation name="getFollowees">
 			<input name="getFollowees" message="tns:getFollowees" />
@@ -164,6 +254,13 @@
 			<input name="getAddNonce" message="tns:getAddNonce" />
 			<output name="getAddNonceResponse" message="tns:getAddNonceResponse" />
 			<fault name="ConnectionAlreadyExists" message="tns:ConnectionAlreadyExists" />
+			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
+		</operation>
+		<operation name="addFollowee">
+			<input name="addFollowee" message="tns:addFollowee" />
+			<output name="addFolloweeResponse" message="tns:addFolloweeResponse" />
+			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
+			<fault name="InvalidNonce" message="tns:InvalidNonce" />
 		</operation>
 	</portType>
 
@@ -190,6 +287,15 @@
 			<output>
 				<soap:body use="literal" />
 			</output>
+			<fault name="InvalidPhoneNumber">
+				<soap:fault name="InvalidPhoneNumber" use="literal" />
+			</fault>
+			<fault name="InvalidEmail">
+				<soap:fault name="InvalidEmail" use="literal" />
+			</fault>
+			<fault name="InvalidPassword">
+				<soap:fault name="InvalidPassword" use="literal" />
+			</fault>
 		</operation>
 		<operation name="register">
 			<soap:operation soapAction="" />
@@ -199,6 +305,18 @@
 			<output>
 				<soap:body use="literal" />
 			</output>
+			<fault name="InvalidPhoneNumber">
+				<soap:fault name="InvalidPhoneNumber" use="literal" />
+			</fault>
+			<fault name="InvalidEmail">
+				<soap:fault name="InvalidEmail" use="literal" />
+			</fault>
+			<fault name="InvalidPassword">
+				<soap:fault name="InvalidPassword" use="literal" />
+			</fault>
+			<fault name="DifferentPasswords">
+				<soap:fault name="DifferentPasswords" use="literal" />
+			</fault>
 		</operation>
 		<operation name="getFollowees">
 			<soap:operation soapAction="" />
@@ -220,6 +338,25 @@
 			</output>
 			<fault name="ConnectionAlreadyExists">
 				<soap:fault name="ConnectionAlreadyExists" use="literal" />
+			</fault>
+			<fault name="InvalidPhoneNumber">
+				<soap:fault name="InvalidPhoneNumber" use="literal" />
+			</fault>
+		</operation>
+
+		<operation name="addFollowee">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="InvalidPhoneNumber">
+				<soap:fault name="InvalidPhoneNumber" use="literal" />
+			</fault>
+			<fault name="InvalidNonce">
+				<soap:fault name="InvalidNonce" use="literal" />
 			</fault>
 		</operation>
 	</binding>

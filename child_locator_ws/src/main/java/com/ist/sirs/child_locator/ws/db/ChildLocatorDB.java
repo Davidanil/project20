@@ -203,6 +203,7 @@ public class ChildLocatorDB {
 	}
 
 	//insert nonce to db. if conection already exists, update
+	//return true if changes were made
 	public boolean insertNonce(String phoneNumber1, String phoneNumber2, String nonce) {
 		try {
 			//check if connection already exists

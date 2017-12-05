@@ -27,18 +27,18 @@ import com.ist.sirs.child_locator.handlers.TimeHandler;
 import com.ist.sirs.child_locator.ws.db.ChildLocatorDB;
 
 @WebService(endpointInterface = "com.ist.sirs.child_locator.ws.ChildLocatorPortType", wsdlLocation = "childLocator.1_0.wsdl", name = "ChildLocatorService", portName = "ChildLocatorPort", targetNamespace = "http://ws.child_locator.sirs.ist.com/", serviceName = "ChildLocatorService")
-@HandlerChain(file="/child_locator_ws_handler_chain.xml")
+@HandlerChain(file = "/child_locator_ws_handler_chain.xml")
 public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	private static final int PASSNUMMIN = 8;
 	private static final int PASSNUMMAX = 32;
-	
+
 	@Resource
 	private WebServiceContext webServiceContext;
-	
+
 	private ChildLocatorDB db;
 
 	private ChildLocatorPortImpl() {
-		db = ChildLocatorDB.getInstance(); 
+		db = ChildLocatorDB.getInstance();
 	}
 
 	private static class SingletonHolder {
@@ -52,39 +52,44 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	// -------------- SERVICE METHODS --------------
 
 	@Override
-	public String print() throws InvalidLoginTime_Exception{
-		if(!validLoginTime())
+	public String print() throws InvalidLoginTime_Exception {
+		if (!validLoginTime())
 			throwInvalidLoginTimeException("Your last login was over a day ago, you need to re-login.");
 		return "bazinga";
 	}
 
 	@Override
-	public boolean login(String phoneNumber, String email, String password) {
-		if(isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)){
-			//salt and hash password
+	public boolean login(String phoneNumber, String email, String password)
+			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception {
+		if (isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)) {
+			// salt and hash password
 			String salt = db.getSalt(phoneNumber);
 			byte[] hashedPassword = hashPassword(password, ToByteArray(salt));
-			return db.login(email,toHexString(hashedPassword));
+			return db.login(email, toHexString(hashedPassword));
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
-	public boolean register(String phoneNumber, String email, String password1, String password2){
-		if(isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password1)
-				&& isPassword(password2) && password1.equals(password2)){
+	public boolean register(String phoneNumber, String email, String password1, String password2)
+			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception,
+			DifferentPasswords_Exception {
+		if (isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password1) && isPassword(password2)) {
+			if (!password1.equals(password2))
+				throwDifferentPasswords();
+
 			byte[] salt = generateSalt();
 			byte[] hash = hashPassword(password1, salt);
 			return db.register(phoneNumber, email, toHexString(salt), toHexString(hash));
 		}
-		return false;	
+		return false;
 	}
-	
+
 	@Override
-	public List<FolloweeView> getFollowees(){
+	public List<FolloweeView> getFollowees() {
 		String phoneNumber = getPhoneNumberFromHandler();
-		
+
 		List<String> followees = db.getFollowees(phoneNumber);
 		List<FolloweeView> followeesList = new ArrayList<FolloweeView>();
 		for (String followee : followees) {
@@ -92,185 +97,243 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 			fv.setPhoneNumber(followee);
 			followeesList.add(fv);
 		}
-		
-		return followeesList;
-		
-	}
-	
-	@Override
-	public String getAddNonce(String followerPhoneNumber) throws ConnectionAlreadyExists_Exception{
-		//get phonenumber from handler
-		String phoneNumber = getPhoneNumberFromHandler();
-		
-		//valid phonenumber
-		
-		
-		//generate nonce
-		SecureRandom random = new SecureRandom();
-	    byte bytes[] = new byte[11];
-	    random.nextBytes(bytes);
-	    Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-	    String nonce = encoder.encodeToString(bytes);
-	    
-	    //check if user is already added
-	    if(db.isAlreadyFollowedBy(phoneNumber, followerPhoneNumber))
-	    	throwConnectionAlreadyExistsException(followerPhoneNumber + " is already following you");
-	    
-	    //if is already being followed but was never connected and nonce is still valid, return same nonce
-	    //otherwise return new one and update db
-	    String nonceDB = db.isFollowedButNotConnected(phoneNumber, followerPhoneNumber);
-	    if(nonceDB != null)
-	    	return nonceDB;
-	    
-	    //insert nonce into connected table
-	    //TODO: throw exception
-	    db.insertNonce(phoneNumber, followerPhoneNumber, nonce);
-	    return nonce;
-	}
-	
-	
-	//true - no need to re-login
-	//false - force client to re-login
-	public boolean validLoginTime(){
-		MessageContext messageContext = webServiceContext.getMessageContext();
 
-		Timestamp time = (Timestamp) messageContext.get(TimeHandler.CONTEXT_PROPERTY);
+		return followeesList;
+
+	}
+
+	@Override
+	public String getAddNonce(String followerPhoneNumber)
+			throws ConnectionAlreadyExists_Exception, InvalidPhoneNumber_Exception {
+		// get phonenumber from handler
 		String phoneNumber = getPhoneNumberFromHandler();
+
+		// validates phonenumber, throws exception if it isnt
+		isPhoneNumber(followerPhoneNumber);
+
+		// generate nonce
+		SecureRandom random = new SecureRandom();
+		byte bytes[] = new byte[12];
+		random.nextBytes(bytes);
+		Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+		String nonce = encoder.encodeToString(bytes);
+		// https://tools.ietf.org/rfc/rfc4648.txt [page 8]
 		
-		if(isPhoneNumber(phoneNumber)){
-			Timestamp lastLogin = db.getLoginTime(phoneNumber);
-			
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(lastLogin);
-			cal.add(Calendar.DAY_OF_WEEK, 1);
-			lastLogin = new Timestamp(cal.getTime().getTime());
-			
-			boolean validLoginTime = time.before(lastLogin);
-			
-			return validLoginTime;
+		// check if user is already added
+		if (db.isAlreadyFollowedBy(phoneNumber, followerPhoneNumber))
+			throwConnectionAlreadyExistsException(followerPhoneNumber + " is already following you");
+
+		// if is already being followed but was never connected and nonce is
+		// still valid, return same nonce
+		// otherwise return new one and update db
+		String nonceDB = db.isFollowedButNotConnected(phoneNumber, followerPhoneNumber);
+		if (nonceDB != null)
+			return nonceDB;
+
+		// insert nonce into connected table
+		// TODO: throw exception
+		db.insertNonce(phoneNumber, followerPhoneNumber, nonce);
+		return nonce;
+	}
+
+	@Override
+	public boolean addFollowee(String phoneNumber, String nonce)
+			throws InvalidPhoneNumber_Exception, InvalidNonce_Exception {
+		if (isPhoneNumber(phoneNumber) && isNonce(nonce)) {
+			return true;
 		}
+		
 		return false;
 	}
 
 	// --------------- AUX METHODS -----------------
+	// true - no need to re-login
+	// false - force client to re-login
+	public boolean validLoginTime() {
+		MessageContext messageContext = webServiceContext.getMessageContext();
 
-	// Checks if password has at least PASSNUM digits ["{"+ PASSNUM +",}"] and
-	// does not allow whitesapces ["(?=\\S+$)"]
-	private boolean isPassword(String password) {
-		Pattern pattern = Pattern.compile("^(?=\\S+$).{" + PASSNUMMIN + "," + PASSNUMMAX + "}$");
-		Matcher matcher = pattern.matcher(password);
+		Timestamp time = (Timestamp) messageContext.get(TimeHandler.CONTEXT_PROPERTY);
+		String phoneNumber = getPhoneNumberFromHandler();
+
+		try {
+			if (isPhoneNumber(phoneNumber)) {
+				Timestamp lastLogin = db.getLoginTime(phoneNumber);
+
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(lastLogin);
+				cal.add(Calendar.DAY_OF_WEEK, 1);
+				lastLogin = new Timestamp(cal.getTime().getTime());
+
+				boolean validLoginTime = time.before(lastLogin);
+
+				return validLoginTime;
+			}
+		} catch (InvalidPhoneNumber_Exception e) {
+			return false;
+		}
+
+		return false;
+	}
+
+	// Checks if has 9 all integer characters
+	private boolean isPhoneNumber(String num) throws InvalidPhoneNumber_Exception {
+		Pattern pattern = Pattern.compile("^\\d{9}$");
+		Matcher matcher = pattern.matcher(num);
 		if (matcher.find())
 			return true;
 
-		System.err.println(
-				"Password must be at least " + PASSNUMMIN + " characters and maximum " + PASSNUMMAX + "characters");
+		throwInvalidPhoneNumber();
+
 		return false;
 	}
 
 	// Check if it's email
-	public boolean isEmail(String email) {
+	private boolean isEmail(String email) throws InvalidEmail_Exception {
 		Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(email);
 		if (matcher.find())
 			return true;
 
-		System.err.println(email + " is not a valid email address.");
+		throwInvalidEmail();
+
 		return false;
-	}
-
-	// Checks if has 9 all integer characters
-	private static boolean isPhoneNumber(String num) {
-		try {
-			Integer.valueOf(num);
-		} catch (Exception e) {
-			System.err.println("Phone number must contain only numbers");
-			return false;
-		}
-
-		if (num.length() == 9 && Integer.valueOf(num) > 0)
-			return true;
-
-		System.err.println("Phone number must contain 9 digits");
-		return false;
-
 	}
 	
+	private boolean isNonce(String nonce) throws InvalidNonce_Exception{
+		Pattern pattern = Pattern.compile("^[A-Z0-9-_]{16}$", Pattern.CASE_INSENSITIVE);
+		Matcher matcher = pattern.matcher(nonce);
+		if (matcher.find())
+			return true;
+		
+		throwInvalidNonce("Invalid Nonce.");
+
+		return false;
+	}
+
+	// Checks if password has at least PASSNUM digits ["{"+ PASSNUM +",}"] and
+	// does not allow whitesapces ["(?=\\S+$)"]
+	private boolean isPassword(String password) throws InvalidPassword_Exception {
+		Pattern pattern = Pattern.compile("^(?=\\S+$).{" + PASSNUMMIN + "," + PASSNUMMAX + "}$");
+		Matcher matcher = pattern.matcher(password);
+		if (matcher.find())
+			return true;
+
+		throwInvalidPassword();
+
+		return false;
+	}
+
 	public byte[] hashPassword(String password, byte[] salt) {
 		char[] pass = password.toCharArray();
-        PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 32 * 8);
-        SecretKeyFactory skf;
-        byte[] hash=null;
+		PBEKeySpec spec = new PBEKeySpec(pass, salt, 20000, 32 * 8);
+		SecretKeyFactory skf;
+		byte[] hash = null;
 		try {
 			skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 			hash = skf.generateSecret(spec).getEncoded();
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
 			System.err.println("Failed to generate hash for password " + e);
 		}
-		
-        //System.out.println(toHexString(hash));
+
+		// System.out.println(toHexString(hash));
 		return hash;
 	}
-	
+
 	public byte[] generateSalt() {
 		SecureRandom random = null;
 		try {
 			new SecureRandom();
-			//The name of the pseudo-random number generation (PRNG) algorithm supplied by the SUN provider
+			// The name of the pseudo-random number generation (PRNG) algorithm
+			// supplied by the SUN provider
 			random = SecureRandom.getInstance("SHA1PRNG");
 		} catch (NoSuchAlgorithmException e) {
 			System.err.println("Failed to generate salt " + e);
 		}
-        byte bytes[] = new byte[32];
-        //System.out.println( random.getAlgorithm());
-        random.nextBytes(bytes);
-        return bytes;
+		byte bytes[] = new byte[32];
+		// System.out.println( random.getAlgorithm());
+		random.nextBytes(bytes);
+		return bytes;
 
 	}
-	
+
 	public String toHexString(byte[] bytes) {
-	    StringBuilder hexString = new StringBuilder();
+		StringBuilder hexString = new StringBuilder();
 
-	    for (int i = 0; i < bytes.length; i++) {
-	        String hex = Integer.toHexString(0xFF & bytes[i]);
-	        if (hex.length() == 1) {
-	            hexString.append('0');
-	        }
-	        hexString.append(hex);
-	    }
+		for (int i = 0; i < bytes.length; i++) {
+			String hex = Integer.toHexString(0xFF & bytes[i]);
+			if (hex.length() == 1) {
+				hexString.append('0');
+			}
+			hexString.append(hex);
+		}
 
-	    return hexString.toString();
+		return hexString.toString();
 	}
-	
+
 	public byte[] ToByteArray(String s) {
 		byte[] data = null;
-		if(s.isEmpty()) return data;
-	    int len = s.length();
-	    data = new byte[len / 2];
-	    for (int i = 0; i < len; i += 2) {
-	        data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
-	                             + Character.digit(s.charAt(i+1), 16));
-	    }
-	    return data;
+		if (s.isEmpty())
+			return data;
+		int len = s.length();
+		data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4) + Character.digit(s.charAt(i + 1), 16));
+		}
+		return data;
 	}
-	
-	public String getPhoneNumberFromHandler(){
+
+	public String getPhoneNumberFromHandler() {
 		MessageContext messageContext = webServiceContext.getMessageContext();
-		
+
 		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
 		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
-		
+
 		return id1.length() > 0 ? id1 : id2;
 	}
-	
-	
+
 	/** Helper method to throw new InvalidTimeException exception */
-	private void throwInvalidLoginTimeException(final String message) throws InvalidLoginTime_Exception{
+	private void throwInvalidPhoneNumber() throws InvalidPhoneNumber_Exception {
+		String message = "Invalid phone number. It must have 9 digits.";
+		InvalidPhoneNumber faultInfo = new InvalidPhoneNumber();
+		faultInfo.setMessage(message);
+		throw new InvalidPhoneNumber_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidEmail() throws InvalidEmail_Exception {
+		String message = "Invalid email. Example: sheldon@bazinga.com";
+		InvalidEmail faultInfo = new InvalidEmail();
+		faultInfo.setMessage(message);
+		throw new InvalidEmail_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidPassword() throws InvalidPassword_Exception {
+		String message = "Password must be at least " + PASSNUMMIN + " characters and maximum " + PASSNUMMAX
+				+ "characters";
+		InvalidPassword faultInfo = new InvalidPassword();
+		faultInfo.setMessage(message);
+		throw new InvalidPassword_Exception(message, faultInfo);
+	}
+	
+	private void throwInvalidNonce(String message) throws InvalidNonce_Exception {
+		InvalidNonce faultInfo = new InvalidNonce();
+		faultInfo.setMessage(message);
+		throw new InvalidNonce_Exception(message, faultInfo);
+	}
+
+	private void throwDifferentPasswords() throws DifferentPasswords_Exception {
+		String message = "Passwords dont match.";
+		DifferentPasswords faultInfo = new DifferentPasswords();
+		faultInfo.setMessage(message);
+		throw new DifferentPasswords_Exception(message, faultInfo);
+	}
+
+	private void throwInvalidLoginTimeException(final String message) throws InvalidLoginTime_Exception {
 		InvalidLoginTime faultInfo = new InvalidLoginTime();
 		faultInfo.setMessage(message);
 		throw new InvalidLoginTime_Exception(message, faultInfo);
 	}
-	
-	private void throwConnectionAlreadyExistsException(final String message) throws ConnectionAlreadyExists_Exception{
+
+	private void throwConnectionAlreadyExistsException(final String message) throws ConnectionAlreadyExists_Exception {
 		ConnectionAlreadyExists faultInfo = new ConnectionAlreadyExists();
 		faultInfo.setMessage(message);
 		throw new ConnectionAlreadyExists_Exception(message, faultInfo);

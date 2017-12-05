@@ -57,14 +57,16 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 
 	@Override
-	public boolean login(String phoneNumber, String email, String password){
+	public boolean login(String phoneNumber, String email, String password) 
+			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception{
 		Date date = new Date();
 		Timestamp ts = new Timestamp(date.getTime());
 		return port.login(phoneNumber, email, password);
 	}
 	
 	@Override
-	public boolean register(String phoneNumber, String email, String password1, String password2){
+	public boolean register(String phoneNumber, String email, String password1, String password2) 
+			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception, DifferentPasswords_Exception{
 		return port.register(phoneNumber, email, password1, password2);
 	}
 	
@@ -74,7 +76,13 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 	
 	@Override
-	public String getAddNonce(String phoneNumber)  throws ConnectionAlreadyExists_Exception{
+	public String getAddNonce(String phoneNumber)  
+			throws ConnectionAlreadyExists_Exception, InvalidPhoneNumber_Exception{
 		return port.getAddNonce(phoneNumber);
+	}
+	
+	@Override
+	public boolean addFollowee(String phoneNumber, String nonce) throws InvalidPhoneNumber_Exception, InvalidNonce_Exception{
+		return port.addFollowee(phoneNumber, nonce);
 	}
 }

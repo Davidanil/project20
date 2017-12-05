@@ -36,7 +36,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	private WebServiceContext webServiceContext;
 
 	private ChildLocatorDB db;
-
+	
 	private ChildLocatorPortImpl() {
 		db = ChildLocatorDB.getInstance();
 	}
@@ -113,10 +113,11 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 
 		// generate nonce
 		SecureRandom random = new SecureRandom();
-		byte bytes[] = new byte[12];
+		byte bytes[] = new byte[6];
 		random.nextBytes(bytes);
-		Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-		String nonce = encoder.encodeToString(bytes);
+		//Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+		//String nonce = encoder.encodeToString(bytes);
+		String nonce = toHexString(bytes).toUpperCase();
 		// https://tools.ietf.org/rfc/rfc4648.txt [page 8]
 		
 		// check if user is already added

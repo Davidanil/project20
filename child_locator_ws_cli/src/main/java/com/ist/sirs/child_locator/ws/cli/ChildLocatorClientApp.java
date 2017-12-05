@@ -235,6 +235,11 @@ public class ChildLocatorClientApp {
 				System.out.print("Repeat password: ");
 				password2 = scanner.next();
 				if (client.register(phone, email, password1, password2)) {
+					//create local file with phone number
+					FileOutputStream out = new FileOutputStream("src/main/resources/phoneNumber");
+					out.write(phone.getBytes(StandardCharsets.UTF_8));
+					out.close();
+					
 					mainMenu();
 					loop = false;
 				} else

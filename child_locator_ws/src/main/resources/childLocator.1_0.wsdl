@@ -12,48 +12,53 @@
 		<xs:schema xmlns:tns="http://ws.child_locator.sirs.ist.com/"
 			xmlns:xs="http://www.w3.org/2001/XMLSchema" version="1.0"
 			targetNamespace="http://ws.child_locator.sirs.ist.com/">
-			
+
 			<xs:element name="print" type="tns:print" />
 			<xs:element name="printResponse" type="tns:printResponse" />
-			<xs:element name="InvalidLoginTime" type="tns:InvalidLoginTime"/>
+			<xs:element name="InvalidLoginTime" type="tns:InvalidLoginTime" />
 			<xs:element name="login" type="tns:login" />
 			<xs:element name="loginResponse" type="tns:loginResponse" />
 			<xs:element name="register" type="tns:register" />
 			<xs:element name="registerResponse" type="tns:registerResponse" />
 			<xs:element name="getFollowees" type="tns:getFollowees" />
 			<xs:element name="getFolloweesResponse" type="tns:getFolloweesResponse" />
-			
+			<xs:element name="getAddNonce" type="tns:getAddNonce" />
+			<xs:element name="getAddNonceResponse" type="tns:getAddNonceResponse" />
+			<xs:element name="ConnectionAlreadyExists" type="tns:ConnectionAlreadyExists" />
+
 			<xs:complexType name="print">
 				<xs:sequence />
 			</xs:complexType>
-			
+
 			<xs:complexType name="printResponse">
 				<xs:sequence>
 					<xs:element name="return" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
-			
+
 			<xs:complexType name="InvalidLoginTime">
-                <xs:sequence>
-                    <xs:element name="message" type="xs:string" minOccurs="0"/>
-                </xs:sequence>
-            </xs:complexType>
-			
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+
 			<xs:complexType name="login">
 				<xs:sequence>
-					<xs:element name="phoneNumber" type="xs:string" minOccurs="0" />
+					<xs:element name="phoneNumber" type="xs:string"
+						minOccurs="0" />
 					<xs:element name="email" type="xs:string" minOccurs="0" />
 					<xs:element name="password" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
 			<xs:complexType name="loginResponse">
 				<xs:sequence>
-					<xs:element name="return" type="xs:boolean"/>
+					<xs:element name="return" type="xs:boolean" />
 				</xs:sequence>
 			</xs:complexType>
 			<xs:complexType name="register">
 				<xs:sequence>
-					<xs:element name="phoneNumber" type="xs:string" minOccurs="0" />
+					<xs:element name="phoneNumber" type="xs:string"
+						minOccurs="0" />
 					<xs:element name="email" type="xs:string" minOccurs="0" />
 					<xs:element name="password1" type="xs:string" minOccurs="0" />
 					<xs:element name="password2" type="xs:string" minOccurs="0" />
@@ -61,27 +66,45 @@
 			</xs:complexType>
 			<xs:complexType name="registerResponse">
 				<xs:sequence>
-					<xs:element name="return" type="xs:boolean"/>
+					<xs:element name="return" type="xs:boolean" />
 				</xs:sequence>
 			</xs:complexType>
-			
+
 			<xs:complexType name="followeeView">
-                <xs:sequence>
-                    <xs:element name="phoneNumber" type="xs:string" minOccurs="0"/>
-                </xs:sequence>
-            </xs:complexType>
+				<xs:sequence>
+					<xs:element name="phoneNumber" type="xs:string"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
 			<xs:complexType name="getFollowees">
-				<xs:sequence/>
+				<xs:sequence />
 			</xs:complexType>
 			<xs:complexType name="getFolloweesResponse">
 				<xs:sequence>
-					<xs:element name="followees" type="tns:followeeView" minOccurs="0" maxOccurs="unbounded"/>
+					<xs:element name="followees" type="tns:followeeView"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:complexType>
+
+			<xs:complexType name="getAddNonce">
+				<xs:sequence>
+					<xs:element name="followerPhoneNumber" type="xs:string"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="getAddNonceResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="ConnectionAlreadyExists">
+				<xs:sequence>
+					<xs:element name="message" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
 		</xs:schema>
 	</types>
-	
-	
+
 	<message name="print">
 		<part name="print" element="tns:print" />
 	</message>
@@ -89,8 +112,8 @@
 		<part name="printResponse" element="tns:printResponse" />
 	</message>
 	<message name="InvalidLoginTime">
-        <part name="fault" element="tns:InvalidLoginTime"/>
-    </message>
+		<part name="fault" element="tns:InvalidLoginTime" />
+	</message>
 	<message name="login">
 		<part name="login" element="tns:login" />
 	</message>
@@ -109,29 +132,41 @@
 	<message name="getFolloweesResponse">
 		<part name="getFolloweesResponse" element="tns:getFolloweesResponse" />
 	</message>
-
+	<message name="getAddNonce">
+		<part name="getAddNonce" element="tns:getAddNonce" />
+	</message>
+	<message name="getAddNonceResponse">
+		<part name="getAddNonceResponse" element="tns:getAddNonceResponse" />
+	</message>
+	<message name="ConnectionAlreadyExists">
+		<part name="fault" element="tns:ConnectionAlreadyExists" />
+	</message>
 
 	<portType name="ChildLocatorPortType">
 		<operation name="print">
-			<input name="print"	message="tns:print" />
+			<input name="print" message="tns:print" />
 			<output name="printResponse" message="tns:printResponse" />
-			<fault name="InvalidLoginTime" message="tns:InvalidLoginTime"/>
+			<fault name="InvalidLoginTime" message="tns:InvalidLoginTime" />
 		</operation>
 		<operation name="login">
-			<input name="login"	message="tns:login" />
+			<input name="login" message="tns:login" />
 			<output name="loginResponse" message="tns:loginResponse" />
 		</operation>
 		<operation name="register">
-			<input name="register"	message="tns:register" />
+			<input name="register" message="tns:register" />
 			<output name="registerResponse" message="tns:registerResponse" />
 		</operation>
 		<operation name="getFollowees">
-			<input name="getFollowees"	message="tns:getFollowees" />
+			<input name="getFollowees" message="tns:getFollowees" />
 			<output name="getFolloweesResponse" message="tns:getFolloweesResponse" />
 		</operation>
+		<operation name="getAddNonce">
+			<input name="getAddNonce" message="tns:getAddNonce" />
+			<output name="getAddNonceResponse" message="tns:getAddNonceResponse" />
+			<fault name="ConnectionAlreadyExists" message="tns:ConnectionAlreadyExists" />
+		</operation>
 	</portType>
-	
-	
+
 	<binding name="ChildLocatorBinding" type="tns:ChildLocatorPortType">
 		<soap:binding transport="http://schemas.xmlsoap.org/soap/http"
 			style="document" />
@@ -144,8 +179,8 @@
 				<soap:body use="literal" />
 			</output>
 			<fault name="InvalidLoginTime">
-                <soap:fault name="InvalidLoginTime" use="literal"/>
-            </fault>
+				<soap:fault name="InvalidLoginTime" use="literal" />
+			</fault>
 		</operation>
 		<operation name="login">
 			<soap:operation soapAction="" />
@@ -173,6 +208,19 @@
 			<output>
 				<soap:body use="literal" />
 			</output>
+		</operation>
+
+		<operation name="getAddNonce">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="ConnectionAlreadyExists">
+				<soap:fault name="ConnectionAlreadyExists" use="literal" />
+			</fault>
 		</operation>
 	</binding>
 	<service name="ChildLocatorService">

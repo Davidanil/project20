@@ -5,6 +5,8 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -76,18 +78,12 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 			byte[] hash = hashPassword(password1, salt);
 			return db.register(phoneNumber, email, toHexString(salt), toHexString(hash));
 		}
-		
 		return false;	
 	}
 	
 	@Override
 	public List<FolloweeView> getFollowees(){
-		MessageContext messageContext = webServiceContext.getMessageContext();
-
-		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
-		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
-	
-		String phoneNumber = id1.length() > 0 ? id1 : id2;
+		String phoneNumber = getPhoneNumberFromHandler();
 		
 		List<String> followees = db.getFollowees(phoneNumber);
 		List<FolloweeView> followeesList = new ArrayList<FolloweeView>();
@@ -101,6 +97,37 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		
 	}
 	
+	@Override
+	public String getAddNonce(String followerPhoneNumber) throws ConnectionAlreadyExists_Exception{
+		//get phonenumber from handler
+		String phoneNumber = getPhoneNumberFromHandler();
+		
+		//valid phonenumber
+		
+		
+		//generate nonce
+		SecureRandom random = new SecureRandom();
+	    byte bytes[] = new byte[11];
+	    random.nextBytes(bytes);
+	    Encoder encoder = Base64.getUrlEncoder().withoutPadding();
+	    String nonce = encoder.encodeToString(bytes);
+	    
+	    //check if user is already added
+	    if(db.isAlreadyFollowedBy(phoneNumber, followerPhoneNumber))
+	    	throwConnectionAlreadyExistsException(followerPhoneNumber + " is already following you");
+	    
+	    //if is already being followed but was never connected and nonce is still valid, return same nonce
+	    //otherwise return new one and update db
+	    String nonceDB = db.isFollowedButNotConnected(phoneNumber, followerPhoneNumber);
+	    if(nonceDB != null)
+	    	return nonceDB;
+	    
+	    //insert nonce into connected table
+	    //TODO: throw exception
+	    db.insertNonce(phoneNumber, followerPhoneNumber, nonce);
+	    return nonce;
+	}
+	
 	
 	//true - no need to re-login
 	//false - force client to re-login
@@ -108,10 +135,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		MessageContext messageContext = webServiceContext.getMessageContext();
 
 		Timestamp time = (Timestamp) messageContext.get(TimeHandler.CONTEXT_PROPERTY);
-		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
-		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
-		
-		String phoneNumber = id1.length() > 0 ? id1 : id2;
+		String phoneNumber = getPhoneNumberFromHandler();
 		
 		if(isPhoneNumber(phoneNumber)){
 			Timestamp lastLogin = db.getLoginTime(phoneNumber);
@@ -229,11 +253,27 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	    return data;
 	}
 	
+	public String getPhoneNumberFromHandler(){
+		MessageContext messageContext = webServiceContext.getMessageContext();
+		
+		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
+		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
+		
+		return id1.length() > 0 ? id1 : id2;
+	}
+	
+	
 	/** Helper method to throw new InvalidTimeException exception */
 	private void throwInvalidLoginTimeException(final String message) throws InvalidLoginTime_Exception{
 		InvalidLoginTime faultInfo = new InvalidLoginTime();
 		faultInfo.setMessage(message);
 		throw new InvalidLoginTime_Exception(message, faultInfo);
+	}
+	
+	private void throwConnectionAlreadyExistsException(final String message) throws ConnectionAlreadyExists_Exception{
+		ConnectionAlreadyExists faultInfo = new ConnectionAlreadyExists();
+		faultInfo.setMessage(message);
+		throw new ConnectionAlreadyExists_Exception(message, faultInfo);
 	}
 
 }

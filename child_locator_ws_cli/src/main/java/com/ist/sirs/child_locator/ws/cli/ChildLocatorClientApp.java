@@ -3,6 +3,7 @@ package com.ist.sirs.child_locator.ws.cli;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -13,6 +14,7 @@ import java.util.regex.Pattern;
 
 import com.ist.sirs.child_locator.ws.FolloweeView;
 import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
+import com.ist.sirs.child_locator.ws.ConnectionAlreadyExists_Exception;
 
 public class ChildLocatorClientApp {
 	public static ChildLocatorClient client = null;
@@ -250,10 +252,12 @@ public class ChildLocatorClientApp {
 		String option;
 		boolean loop = true;
 
+		clearScreen();
+		System.out.println("[MAIN MENU]");
 		System.out.println("What do you want to do?");
 		while (loop) {
-			System.out.println("\t1 - Check followees");
-			System.out.println("\t2 - Check followers");
+			System.out.println("\t1 - Get followees");
+			System.out.println("\t2 - Get followers");
 			System.out.println("\t3 - Add new follower");
 			System.out.println("\t4 - Print");
 			System.out.print("Number of the option:");
@@ -294,56 +298,111 @@ public class ChildLocatorClientApp {
 
 	public static void getFollowees() {
 		List<FolloweeView> followees = client.getFollowees();
-		
+
 		clearScreen();
 		System.out.println("[CHECK FOLLOWEES]");
 		System.out.println("List of people you are following");
-		for(int i = 0; i < followees.size(); i++){
-			System.out.println("\t" + (i+1) + " - " + followees.get(i).getPhoneNumber());
+		for (int i = 0; i < followees.size(); i++) {
+			System.out.println("\t" + (i + 1) + " - " + followees.get(i).getPhoneNumber());
 		}
-		
+
 		Scanner scanner = new Scanner(System.in);
 		String option;
 		boolean loop = true;
-		
+
 		System.out.print("Which one you want to watch? ");
 		while (loop) {
 			try {
 				option = scanner.next();
-				Pattern pattern = Pattern.compile("^\\d$");
+				Pattern pattern = Pattern.compile("^\\d+$");
 				Matcher matcher = pattern.matcher(option);
-				
-				//if its a number
-				if (matcher.find()){
+
+				// if its a number
+				if (matcher.find()) {
 					int optInt = Integer.valueOf(option);
-					if(optInt > 0 && optInt <= followees.size()){
+					if (optInt > 0 && optInt <= followees.size()) {
 						loop = false;
-						checkFollowee(followees.get(optInt-1).getPhoneNumber());
+						checkFollowee(followees.get(optInt - 1).getPhoneNumber());
 					}
 				}
-				
+
 			} catch (Exception e) {
 				System.out.println("[Main Menu] Exception: " + e.getMessage());
 			}
 		}
+
+		scanner.close();
 	}
 
 	public static void getFollowers() {
 
 	}
-	
-	public static void checkFollowee(String phoneNumber){
+
+	public static void checkFollowee(String phoneNumber) {
 		clearScreen();
-		
+
 		System.out.println("BAZINGA");
 	}
 
 	public static void addFollower() {
+		Scanner scanner = new Scanner(System.in);
+		String phoneNumber;
+		boolean loop = true;
+
+		System.out.println("[ADD FOLLOWER]");
+
+		while (loop) {
+
+			try {
+				System.out.print("Follower Phone Number: ");
+				phoneNumber = scanner.next();
+
+				// check if numbers are valid
+				if (isPhoneNumber(phoneNumber)) {
+					loop = false;
+					displayNonce(phoneNumber);
+				} else
+					System.out.println("Invalid phone number, try again.");
+
+			} catch (Exception e) {
+				System.out.println("[Add Follower] Exception: " + e.getMessage());
+			}
+		}
+
+		scanner.close();
+	}
+
+	public static void displayNonce(String phoneNumber) {
+		clearScreen();
+		System.out.println("[DISPLAY NONCE]");
+		try {
+			String nonce = client.getAddNonce(phoneNumber);
+			System.out.println("Give this code to your follower:");
+			System.out.println("\t" + nonce);
+
+			System.in.read();
+		} catch (ConnectionAlreadyExists_Exception | IOException e) {
+			System.out.print("[Display Nonce] Exception: " + e.getMessage());
+		}
+
+		mainMenu();
+	}
+
+	public static void removeFollowee() {
 
 	}
+
+	// ----------- AUX FUNCTIONS -----------
 
 	public static void clearScreen() {
 		System.out.print("\033[H\033[2J");
 		System.out.flush();
+	}
+
+	public static boolean isPhoneNumber(String phoneNumber) {
+		Pattern pattern = Pattern.compile("^\\d{9}$");
+		Matcher matcher = pattern.matcher(phoneNumber);
+
+		return matcher.find();
 	}
 }

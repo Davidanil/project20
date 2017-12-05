@@ -1,5 +1,6 @@
 package com.ist.sirs.child_locator.ws.db;
 
+import java.io.IOException;
 import java.io.Reader;
 import java.sql.Connection;
 
@@ -12,9 +13,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.ist.sirs.child_locator.handlers.TimeHandler;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -58,8 +62,8 @@ public class ChildLocatorDB {
 			stmt.setString(2, passwordHash);
 			ResultSet rs = stmt.executeQuery();
 			boolean hasNext = rs.next();
-			
-			if(hasNext){
+
+			if (hasNext) {
 				PreparedStatement stmt2 = connection.prepareStatement("UPDATE login SET lastlogin=? WHERE email=?");
 				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 				stmt2.setTimestamp(1, timestamp);
@@ -113,10 +117,7 @@ public class ChildLocatorDB {
 			int count = stmt.executeUpdate();
 
 			// successful insert
-			if (count > 0)
-				return true;
-			else
-				return false;
+			return count > 0;
 
 		} catch (SQLException e) {
 			System.err.println(e.getMessage());
@@ -139,23 +140,102 @@ public class ChildLocatorDB {
 		}
 		return time;
 	}
-	
-	public List<String> getFollowees(String phoneNumber){
+
+	public List<String> getFollowees(String phoneNumber) {
 		List<String> phoneNumbers = new ArrayList<String>();
 		try {
 			PreparedStatement stmt = connection.prepareStatement("SELECT phone2 FROM connected WHERE phone=?");
 			stmt.setString(1, phoneNumber);
 			ResultSet rs = stmt.executeQuery();
 
-			while(rs.next()){
+			while (rs.next()) {
 				phoneNumbers.add(rs.getString("phone2"));
 			}
 
 		} catch (SQLException e) {
 			System.out.println("[DB - getFollowees] Exception - " + e.getMessage());
 		}
-		
+
 		return phoneNumbers;
+	}
+
+	//connection in db and already confirmed
+	public boolean isAlreadyFollowedBy(String phoneNumber1, String phoneNumber2) {
+		try {
+			PreparedStatement stmt = connection
+					.prepareStatement("SELECT connectid FROM connected WHERE phone=? AND phone2=? AND connected=1");
+			stmt.setString(1, phoneNumber1);
+			stmt.setString(2, phoneNumber2);
+			ResultSet rs = stmt.executeQuery();
+
+			return rs.next();
+
+		} catch (SQLException e) {
+			System.out.println("[DB - isAlreadyFollowedBy] Exception - " + e.getMessage());
+			return false;
+		}
+	}
+
+	//connection is already in db but was never confirmed. get nonce if its still valid, null otherwise
+	public String isFollowedButNotConnected(String phoneNumber1, String phoneNumber2) {
+		try {
+			int seconds = 0;
+			Properties prop = new Properties();
+			prop.load(ChildLocatorDB.class.getResourceAsStream("/config.properties"));
+			seconds = Integer.parseInt(prop.getProperty("nonceTimeout"));
+
+			PreparedStatement stmt = connection
+					.prepareStatement("SELECT nonce FROM connected "
+							+ "WHERE phone=? AND phone2=? AND connected=0 AND UNIX_TIMESTAMP(NOW())-UNIX_TIMESTAMP(timestamp) < ?");
+			stmt.setString(1, phoneNumber1);
+			stmt.setString(2, phoneNumber2);
+			stmt.setInt(3, seconds);
+			ResultSet rs = stmt.executeQuery();
+
+			if(rs.next())
+				return rs.getString(0);
+			return null;
+			
+		} catch (IOException | SQLException e) {
+			System.out.println("[DB - isFollowedButNotConnected] Exception - " + e.getMessage());
+			return null;
+		}
+	}
+
+	//insert nonce to db. if conection already exists, update
+	public boolean insertNonce(String phoneNumber1, String phoneNumber2, String nonce) {
+		try {
+			//check if connection already exists
+			PreparedStatement stmt0 = connection
+					.prepareStatement("SELECT connectid FROM connected WHERE phone=? AND phone2=?");
+			stmt0.setString(1, phoneNumber1);
+			stmt0.setString(2, phoneNumber2);
+			ResultSet rs = stmt0.executeQuery();
+
+			//update
+			if(rs.next()){
+				PreparedStatement stmt1 = connection.prepareStatement("UPDATE connected SET nonce=?, timestamp=NOW() WHERE phone=? AND phone2=?");
+				stmt1.setString(1, nonce);
+				stmt1.setString(2, phoneNumber1);
+				stmt1.setString(3, phoneNumber2);
+				int count1 = stmt1.executeUpdate();
+				
+				return count1 > 0;
+			}
+
+			//insert
+			PreparedStatement stmt2 = connection.prepareStatement("INSERT INTO connected(phone, phone2, connected, nonce, timestamp)" + "VALUES(?,?,0,?,NOW())");
+			stmt2.setString(1, phoneNumber1);
+			stmt2.setString(2, phoneNumber2);
+			stmt2.setString(3, nonce);
+			int count2 = stmt2.executeUpdate();
+
+			return count2 > 0;
+
+		} catch (SQLException e) {
+			System.out.println("[DB - insertNonce] Exception - " + e.getMessage());
+			return false;
+		}
 	}
 
 	// Print login table

@@ -72,4 +72,9 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	public List<FolloweeView> getFollowees(){
 		return port.getFollowees();
 	}
+	
+	@Override
+	public String getAddNonce(String phoneNumber)  throws ConnectionAlreadyExists_Exception{
+		return port.getAddNonce(phoneNumber);
+	}
 }

@@ -59,7 +59,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 		try {
 			if (outboundElement.booleanValue()) { // Add time stamp header
 				//System.out.println("Writing header in outbound SOAP message...");
-
+				
 				// get SOAP envelope
 				SOAPMessage msg = smc.getMessage();
 				SOAPPart sp = msg.getSOAPPart();
@@ -73,16 +73,15 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				// add header element (name, namespace prefix, namespace)
 				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
 				SOAPHeaderElement element = sh.addHeaderElement(name);
-
+				
 				// add header element value
-
 				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 				String valueString = timestamp.toString();
 				element.addTextNode(valueString);
 			}
 			else{ // Check time stamp
 				//System.out.println("Reading header in inbound SOAP message...");
-
+				
 				// get SOAP envelope header
 				SOAPMessage msg = smc.getMessage();
 				SOAPPart sp = msg.getSOAPPart();
@@ -107,31 +106,27 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 				// get header element value
 				String valueString = element.getValue();
-				
+
 				Timestamp timestamp = Timestamp.valueOf(valueString);
 				// put header in a property context
 				smc.put(CONTEXT_PROPERTY, timestamp);
 				// set property scope to application client/server class can
 				// access it
 				smc.setScope(CONTEXT_PROPERTY, Scope.APPLICATION);
-				
+
 				int seconds = 0;
 				Properties prop = new Properties();
 				try{
 					prop.load(TimeHandler.class.getResourceAsStream("/config.properties"));
-					
 					seconds = Integer.parseInt(prop.getProperty("freshnessTimeout"));
 				} catch(IOException ioe){
 					System.out.println(ioe);
 				}
-				
+
 				//Add x seconds to timestamp
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(timestamp);
-				cal.add(Calendar.SECOND, seconds);
-				timestamp = new Timestamp(cal.getTime().getTime());
-				
-				if(timestamp.before(new Timestamp(System.currentTimeMillis()))) // time > X sec, error
+				Timestamp interval = new Timestamp(timestamp.getTime() + seconds * 1000);
+
+				if(interval.before(new Timestamp(System.currentTimeMillis()))) // time > X sec, error
 				   throw new RuntimeException(String.format("Time exceeded %d seconds.",seconds));
             
 			}

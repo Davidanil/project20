@@ -65,14 +65,14 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 			// salt and hash password
 			String salt = db.getSalt(phoneNumber);
 			byte[] hashedPassword = hashPassword(password, ToByteArray(salt));
-			return db.login(email, toHexString(hashedPassword));
+			return db.login(phoneNumber, email, toHexString(hashedPassword));
 		}
 
 		return false;
 	}
 
 	@Override
-	public boolean register(String phoneNumber, String email, String password1, String password2)
+	public String register(String phoneNumber, String email, String password1, String password2)
 			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception,
 			DifferentPasswords_Exception {
 		if (isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password1) && isPassword(password2)) {
@@ -81,9 +81,19 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 
 			byte[] salt = generateSalt();
 			byte[] hash = hashPassword(password1, salt);
-			return db.register(phoneNumber, email, toHexString(salt), toHexString(hash));
+			String registerCode = generateNonce();
+			if(db.register(phoneNumber, email, toHexString(salt), toHexString(hash), registerCode)){
+				return registerCode;
+			}
 		}
-		return false;
+		return null;
+	}
+	
+	@Override
+	public boolean confirmRegistration(String code){
+		String phoneNumber = getPhoneNumberFromHandler();
+		
+		return db.confirmRegistration(phoneNumber, code);
 	}
 
 	@Override
@@ -112,13 +122,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		isPhoneNumber(followerPhoneNumber);
 
 		// generate nonce
-		SecureRandom random = new SecureRandom();
-		byte bytes[] = new byte[6];
-		random.nextBytes(bytes);
-		//Encoder encoder = Base64.getUrlEncoder().withoutPadding();
-		//String nonce = encoder.encodeToString(bytes);
-		String nonce = toHexString(bytes).toUpperCase();
-		// https://tools.ietf.org/rfc/rfc4648.txt [page 8]
+		String nonce = generateNonce();
 		
 		// check if user is already added
 		if (db.isAlreadyFollowedBy(phoneNumber, followerPhoneNumber))
@@ -141,7 +145,8 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	public boolean addFollowee(String phoneNumber, String nonce)
 			throws InvalidPhoneNumber_Exception, InvalidNonce_Exception {
 		if (isPhoneNumber(phoneNumber) && isNonce(nonce)) {
-			return true;
+			String followerPhoneNumber = getPhoneNumberFromHandler();
+			return db.addFollowee(phoneNumber, followerPhoneNumber, nonce);
 		}
 		
 		return false;
@@ -201,7 +206,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	}
 	
 	private boolean isNonce(String nonce) throws InvalidNonce_Exception{
-		Pattern pattern = Pattern.compile("^[A-Z0-9-_]{16}$", Pattern.CASE_INSENSITIVE);
+		Pattern pattern = Pattern.compile("^[A-Z0-9-_]{12}$", Pattern.CASE_INSENSITIVE);
 		Matcher matcher = pattern.matcher(nonce);
 		if (matcher.find())
 			return true;
@@ -289,9 +294,17 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		String id1 = (String) messageContext.get(IdHandler.CONTEXT_PROPERTY);
 		String id2 = (String) messageContext.get(LoginRegisterIdHandler.CONTEXT_PROPERTY);
 
-		return id1.length() > 0 ? id1 : id2;
+		return id1 != null && id1.length() > 0 ? id1 : id2;
 	}
 
+	private String generateNonce(){
+		// https://tools.ietf.org/rfc/rfc4648.txt [page 8]
+		SecureRandom random = new SecureRandom();
+		byte bytes[] = new byte[6];
+		random.nextBytes(bytes);
+		return toHexString(bytes).toUpperCase();
+	}
+	
 	/** Helper method to throw new InvalidTimeException exception */
 	private void throwInvalidPhoneNumber() throws InvalidPhoneNumber_Exception {
 		String message = "Invalid phone number. It must have 9 digits.";

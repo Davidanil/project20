@@ -38,7 +38,7 @@ public class ChildLocatorClientApp {
 
 	public static void createPin() {
 		Scanner scanner = new Scanner(System.in);
-		String pin;
+		String pin1, pin2;
 		boolean loop = true;
 
 		clearScreen();
@@ -48,15 +48,22 @@ public class ChildLocatorClientApp {
 		while (loop) {
 			try {
 				System.out.print("Pin: ");
-				pin = scanner.next();
+				pin1 = scanner.next();
+				System.out.print("Repeat Pin: ");
+				pin2 = scanner.next();
+
+				if (!pin1.equals(pin2)) {
+					System.out.println("Pins do not match, try again:");
+					continue;
+				}
 
 				// check if valid
 				Pattern pattern = Pattern.compile("^\\d{4,8}$");
-				Matcher matcher = pattern.matcher(pin);
+				Matcher matcher = pattern.matcher(pin1);
 				if (matcher.find()) {
 					// hash pin and save it
 					MessageDigest digest = MessageDigest.getInstance("SHA-256");
-					byte[] hash = digest.digest(pin.getBytes(StandardCharsets.UTF_8));
+					byte[] hash = digest.digest(pin1.getBytes(StandardCharsets.UTF_8));
 
 					FileOutputStream out = new FileOutputStream("src/main/resources/pin");
 					out.write(hash);
@@ -105,25 +112,8 @@ public class ChildLocatorClientApp {
 					firstMenu();
 					loop = false;
 				} else {
-					failedAttempts++;
-
-					if (failedAttempts > 3) {
-						try {
-							// wait e^(failedAttempts) minutes
-							double minutesToSleep = Math.pow(Math.E, failedAttempts);
-							int millisToSleep = (int) minutesToSleep * 60 * 1000;
-							System.out.format(
-									"This is your %d attempt, so youll have to wait %f minutes " + "before retrying.\n",
-									failedAttempts, minutesToSleep);
-							Thread.sleep(millisToSleep);
-						} catch (InterruptedException ex) {
-							Thread.currentThread().interrupt();
-							System.out.println("Exception: " + ex.getMessage());
-						}
-					}
-
+					waitAttempts(++failedAttempts);
 					System.out.println("Pin incorrect, try again.");
-
 				}
 
 			} catch (Exception e) {
@@ -132,6 +122,22 @@ public class ChildLocatorClientApp {
 		}
 
 		scanner.close();
+	}
+
+	public static void waitAttempts(int attempts) {
+		if (attempts > 3) {
+			try {
+				// wait e^(failedAttempts) minutes
+				double minutesToSleep = Math.pow(Math.E, attempts);
+				int millisToSleep = (int) minutesToSleep * 60 * 1000;
+				System.out.format("This is your %d attempt, so youll have to wait %f minutes " + "before retrying.\n",
+						attempts, minutesToSleep);
+				Thread.sleep(millisToSleep);
+			} catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+				System.out.println("Exception: " + ex.getMessage());
+			}
+		}
 	}
 
 	public static void firstMenu() {
@@ -182,6 +188,7 @@ public class ChildLocatorClientApp {
 		Scanner scanner = new Scanner(System.in);
 		String phoneNumber, email, password;
 		boolean loop = true;
+		int failedAttempts = 0;
 
 		clearScreen();
 		System.out.println("[LOGIN]");
@@ -205,8 +212,10 @@ public class ChildLocatorClientApp {
 				if (client.login(phoneNumber, email, password)) {
 					mainMenu();
 					loop = false;
-				} else
-					System.out.println("Wrong info, try again.");
+				} else {
+					waitAttempts(++failedAttempts);
+					System.out.println("Login incorrect, try again.");
+				}
 
 			} catch (Exception e) {
 				System.out.println("[Login] Exception: " + e.getMessage());
@@ -234,13 +243,10 @@ public class ChildLocatorClientApp {
 				password1 = scanner.next();
 				System.out.print("Repeat password: ");
 				password2 = scanner.next();
-				if (client.register(phone, email, password1, password2)) {
-					//create local file with phone number
-					FileOutputStream out = new FileOutputStream("src/main/resources/phoneNumber");
-					out.write(phone.getBytes(StandardCharsets.UTF_8));
-					out.close();
-					
-					mainMenu();
+
+				String registerCode = client.register(phone, email, password1, password2);
+				if (registerCode != null) {
+					confirmRegistration(phone, registerCode);
 					loop = false;
 				} else
 					System.out.println("Wrong info, try again:");
@@ -252,13 +258,63 @@ public class ChildLocatorClientApp {
 		scanner.close();
 	}
 
-	public static void mainMenu() {
+	public static void confirmRegistration(String phone, String registerCode) {
+		Scanner scanner = new Scanner(System.in);
+		String inputCode;
+		boolean loop = true;
+
+		clearScreen();
+		System.out.println("[CONFIRM REGISTRATION]");
+		System.out.println("Confirm you registration by submiting the code send via sms.");
+
+		try {
+			// open texteditor with mocked sms
+			String[] cmds = { "/bin/sh", "-c", "echo '[SMS]\nRegistration Code: " + registerCode + "' | open -f" };
+			Process p = Runtime.getRuntime().exec(cmds);
+			p.waitFor();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		while (loop) {
+			try {
+				System.out.print("Register Code: ");
+				inputCode = scanner.next();
+
+				if (client.confirmRegistration(inputCode)) {
+					// create local file with phone number
+					FileOutputStream out = new FileOutputStream("src/main/resources/phoneNumber");
+					out.write(phone.getBytes(StandardCharsets.UTF_8));
+					out.close();
+
+					mainMenu();
+					loop = false;
+				} else
+					System.out.println("Wrong info, try again:");
+			} catch (Exception e) {
+				System.out.println("[ConfirmRegistration] Exception: " + e.getMessage());
+			}
+		}
+
+		scanner.close();
+	}
+
+	public static void mainMenu(){
+		mainMenu("");
+	}
+	public static void mainMenu(String message) {
 		Scanner scanner = new Scanner(System.in);
 		String option;
 		boolean loop = true;
 
 		clearScreen();
 		System.out.println("[MAIN MENU]");
+		if(message != null && message.length() > 0)
+			System.out.println("\n" + message+"\n");
 		System.out.println("What do you want to do?");
 		while (loop) {
 			System.out.println("\t1 - Get followees");
@@ -312,20 +368,32 @@ public class ChildLocatorClientApp {
 		String option;
 		boolean loop = true;
 
-		System.out.print("Which one you want to watch? ");
+		System.out.print("Which one you want to watch? [q] to return to Main Menu");
 		while (loop) {
 			try {
+				System.out.print("Option: ");
 				option = scanner.next();
-				Pattern pattern = Pattern.compile("^\\d+$");
-				Matcher matcher = pattern.matcher(option);
 
-				// if its a number
-				if (matcher.find()) {
-					int optInt = Integer.valueOf(option);
-					if (optInt > 0 && optInt <= followees.size()) {
-						checkFollowee(followees.get(optInt - 1).getPhoneNumber());
-						loop = false;
-					}
+				// if user wants to return to main menu
+				if (option.equals("q")) {
+					loop = false;
+					mainMenu();
+				} else {
+					Pattern pattern = Pattern.compile("^\\d+$");
+					Matcher matcher = pattern.matcher(option);
+
+					// if its a number
+					if (matcher.find()) {
+						int optInt = Integer.valueOf(option);
+
+						// if its in a valid range
+						if (optInt > 0 && optInt <= followees.size()) {
+							checkFollowee(followees.get(optInt - 1).getPhoneNumber());
+							loop = false;
+						} else
+							System.out.println("Option is not in the range, try again.");
+					} else
+						System.out.println("Option is not a number, try again.");
 				}
 
 			} catch (Exception e) {
@@ -337,7 +405,7 @@ public class ChildLocatorClientApp {
 	}
 
 	public static void getFollowers() {
-
+		
 	}
 
 	public static void checkFollowee(String phoneNumber) {
@@ -352,15 +420,20 @@ public class ChildLocatorClientApp {
 		boolean loop = true;
 
 		System.out.println("[ADD FOLLOWER]");
-
+		System.out.println("Insert phone number of whom you want to be followed by:  [q] to return to Main Menu");
 		while (loop) {
 
 			try {
 				System.out.print("Follower Phone Number: ");
 				phoneNumber = scanner.next();
 
-				displayNonce(phoneNumber);
-				loop = false;
+				if (phoneNumber.equals("q")) {
+					loop = false;
+					mainMenu();
+				} else {
+					displayNonce(phoneNumber);
+					loop = false;
+				}
 
 			} catch (Exception e) {
 				System.out.println("[Add Follower] Exception: " + e.getMessage());
@@ -378,6 +451,7 @@ public class ChildLocatorClientApp {
 			System.out.println("Give this code to your follower:");
 			System.out.println("\t" + nonce);
 
+			System.out.println("\n\nPress any key to return to Main Menu.");
 			System.in.read();
 		} catch (Exception e) {
 			System.out.print("[Display Nonce] Exception: " + e.getMessage());
@@ -385,7 +459,7 @@ public class ChildLocatorClientApp {
 
 		mainMenu();
 	}
-	
+
 	public static void addFollowee() {
 		boolean loop = true;
 		String phoneNumber, nonce;
@@ -393,15 +467,19 @@ public class ChildLocatorClientApp {
 
 		clearScreen();
 		System.out.println("[ADD FOLLOWEE]");
-
+		System.out.println(
+				"Insert phone number of whom you want to follow "
+				+ "and the code. [q] to return to Main Menu");
 		while (loop) {
 			try {
 				System.out.print("Followee Phone Number: ");
 				phoneNumber = scanner.next();
-				System.out.print("Nonce: ");
+				System.out.print("Code: ");
 				nonce = scanner.next();
 
-				client.addFollowee(phoneNumber, nonce);
+				if (!phoneNumber.equals("q") && !nonce.equals("q"))
+					client.addFollowee(phoneNumber, nonce);
+				
 				loop = false;
 
 			} catch (Exception e) {
@@ -410,6 +488,7 @@ public class ChildLocatorClientApp {
 		}
 
 		scanner.close();
+		mainMenu();
 	}
 
 	public static void removeFollowee() {

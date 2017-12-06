@@ -56,6 +56,21 @@ public class ChildLocatorDB {
 	}
  
 	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
+	public boolean sendCoodinates(String phone, String latitude, String longitude) {
+		
+		try{
+			PreparedStatement stmt = connection
+				.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
+		stmt.setString(1, phone);
+		stmt.setString(2, latitude);
+		stmt.setString(3, longitude);
+		return stmt.executeUpdate() == 1;
+		} catch (SQLException e) {
+			System.err.print(e.getMessage());
+			return false;
+		}
+	}
+	
 	public String getCoodinates(String phoneDad, String phoneSon) {
 		if(!isConnected(phoneDad, phoneSon)) return null;
 		
@@ -82,7 +97,24 @@ public class ChildLocatorDB {
 			return null;
 		}
 	}
-	
+	private boolean isVerified(String phone) {
+		ResultSet rs=null;
+		try {
+		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
+		stmt.setString(1, phone);
+		rs = stmt.executeQuery();
+		
+		if (!rs.next()) return false;
+		if (!rs.getString("verified").equals("1")) return false;
+		}
+		catch (SQLException e) {
+			System.err.print(e.getMessage());
+			return false;
+		}
+		
+		return true;
+		
+	}
 	private boolean isConnected(String phoneSon, String phoneDad) {
 		PreparedStatement stmt;
 		String connected=null;
@@ -107,6 +139,7 @@ public class ChildLocatorDB {
 	}
 
 	public boolean login(String phoneNumber, String email, String passwordHash) {
+		if(!isVerified(phoneNumber)) return false;
 		try {
 			PreparedStatement stmt = connection
 					.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");

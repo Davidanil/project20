@@ -54,6 +54,57 @@ public class ChildLocatorDB {
 
 		return rs;
 	}
+ 
+	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
+	public String getCoodinates(String phoneDad, String phoneSon) {
+		if(!isConnected(phoneDad, phoneSon)) return null;
+		
+		String latitude = null;
+		String longitude = null;
+		Timestamp timestamp = null;
+		ResultSet rs = null;
+		
+		try {
+			PreparedStatement stmt2 = connection.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE phone=?");
+				stmt2.setString(1, phoneSon);
+				stmt2.executeUpdate();
+			
+				while (rs.next()) {
+					latitude = rs.getString("latitude");
+					longitude = rs.getString("latitude");
+					timestamp = rs.getTimestamp("timestamp");
+				}
+			String info = latitude + ";" + longitude + ";" +  timestamp;
+			return info;
+
+		} catch (SQLException e) {
+			System.err.print(e.getMessage());
+			return null;
+		}
+	}
+	
+	private boolean isConnected(String phoneSon, String phoneDad) {
+		PreparedStatement stmt;
+		String connected=null;
+		try {
+			stmt = connection.prepareStatement("SELECT connected FROM connected WHERE phone=? AND phone2=?");
+			stmt.setString(1, phoneSon);
+			stmt.setString(2, phoneDad);
+			ResultSet rs = stmt.executeQuery();
+			
+			while (rs.next()) {
+				connected=rs.getString("connected");
+			}
+		
+		} catch (SQLException e) {
+			System.err.print(e.getMessage());
+			return false;
+		}
+		if(!connected.equals("1")) return false;
+		
+		return true;
+		
+	}
 
 	public boolean login(String email, String passwordHash) {
 		try {

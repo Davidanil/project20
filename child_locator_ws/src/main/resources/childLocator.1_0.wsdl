@@ -19,6 +19,8 @@
 			<xs:element name="loginResponse" type="tns:loginResponse" />
 			<xs:element name="register" type="tns:register" />
 			<xs:element name="registerResponse" type="tns:registerResponse" />
+			<xs:element name="confirmRegistration" type="tns:confirmRegistration" />
+			<xs:element name="confirmRegistrationResponse" type="tns:confirmRegistrationResponse" />
 			<xs:element name="getFollowees" type="tns:getFollowees" />
 			<xs:element name="getFolloweesResponse" type="tns:getFolloweesResponse" />
 			<xs:element name="getAddNonce" type="tns:getAddNonce" />
@@ -70,6 +72,18 @@
 				</xs:sequence>
 			</xs:complexType>
 			<xs:complexType name="registerResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+
+			<xs:complexType name="confirmRegistration">
+				<xs:sequence>
+					<xs:element name="code" type="xs:string"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="confirmRegistrationResponse">
 				<xs:sequence>
 					<xs:element name="return" type="xs:boolean" />
 				</xs:sequence>
@@ -179,6 +193,13 @@
 	<message name="registerResponse">
 		<part name="registerResponse" element="tns:registerResponse" />
 	</message>
+	
+	<message name="confirmRegistration">
+		<part name="confirmRegistration" element="tns:confirmRegistration" />
+	</message>
+	<message name="confirmRegistrationResponse">
+		<part name="confirmRegistrationResponse" element="tns:confirmRegistrationResponse" />
+	</message>
 
 	<message name="getFollowees">
 		<part name="getFollowees" element="tns:getFollowees" />
@@ -246,6 +267,11 @@
 			<fault name="InvalidPassword" message="tns:InvalidPassword" />
 			<fault name="DifferentPasswords" message="tns:DifferentPasswords" />
 		</operation>
+		<operation name="confirmRegistration">
+			<input name="confirmRegistration" message="tns:confirmRegistration" />
+			<output name="confirmRegistrationResponse" message="tns:confirmRegistrationResponse" />
+		</operation>
+		
 		<operation name="getFollowees">
 			<input name="getFollowees" message="tns:getFollowees" />
 			<output name="getFolloweesResponse" message="tns:getFolloweesResponse" />
@@ -317,6 +343,15 @@
 			<fault name="DifferentPasswords">
 				<soap:fault name="DifferentPasswords" use="literal" />
 			</fault>
+		</operation>
+		<operation name="confirmRegistration">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
 		</operation>
 		<operation name="getFollowees">
 			<soap:operation soapAction="" />

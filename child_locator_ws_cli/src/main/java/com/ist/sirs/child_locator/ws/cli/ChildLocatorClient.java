@@ -65,9 +65,14 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 	
 	@Override
-	public boolean register(String phoneNumber, String email, String password1, String password2) 
+	public String register(String phoneNumber, String email, String password1, String password2) 
 			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception, DifferentPasswords_Exception{
 		return port.register(phoneNumber, email, password1, password2);
+	}
+	
+	@Override
+	public boolean confirmRegistration(String code){
+		return port.confirmRegistration(code);
 	}
 	
 	@Override

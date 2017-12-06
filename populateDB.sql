@@ -7,7 +7,7 @@ INSERT INTO `login` (`phone`,`email`,`salt`,`password`,`lastlogin`) VALUES (9100
 
 
 /*CONNECTED*/
-INSERT INTO `childdb`.`connected` (`phone`, `phone2`, `nonce`) VALUES ('910000000','910000001','6D68A4E0BC24');
+INSERT INTO `childdb`.`connected` (`followeePhone`, `followerPhone`, `nonce`) VALUES ('910000000','910000001','6D68A4E0BC24');
 
 /*POSITION*/
 INSERT INTO `childdb`.`position` (`phone`, `latitude`, `longitude`) VALUES ('910000000','39.8628316','-4.0273231');

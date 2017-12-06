@@ -26,8 +26,8 @@ USE `childdb` ;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `childdb`.`connected` (
   `connectid` INT(10) NOT NULL AUTO_INCREMENT,
-  `phone` INT(16) NOT NULL,
-  `phone2` INT(16) NOT NULL,
+  `followeePhone` INT(16) NOT NULL,
+  `followerPhone` INT(16) NOT NULL,
   `connected` TINYINT(1) NULL DEFAULT '0',
   `nonce` VARCHAR(16) NULL DEFAULT NULL,
   `timestamp` TIMESTAMP NULL DEFAULT now(),
@@ -50,6 +50,7 @@ CREATE TABLE IF NOT EXISTS `childdb`.`login` (
   `attempts` TINYINT(16) NULL DEFAULT '0',
   `verified` TINYINT(1) NULL DEFAULT '0',
   `lastlogin` TIMESTAMP NULL DEFAULT now(),
+  `registercode` VARCHAR (15) DEFAULT NULL, 
   PRIMARY KEY (`phone`),
   UNIQUE INDEX `username_UNIQUE` (`phone` ASC),
   UNIQUE INDEX `salt_UNIQUE` (`salt` ASC))

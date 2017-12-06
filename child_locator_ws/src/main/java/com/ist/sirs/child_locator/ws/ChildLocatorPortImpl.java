@@ -151,6 +151,15 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		
 		return false;
 	}
+	
+	@Override
+	public boolean sendCoordinates(String phone, String latitude, String longitude) {
+		return db.sendCoodinates(phone, latitude, longitude);
+	}
+	
+	public String getCoordinates(String phoneDad, String phoneSon) {
+		return db.getCoodinates(phoneDad, phoneSon);
+	}
 
 	// --------------- AUX METHODS -----------------
 	// true - no need to re-login
@@ -304,7 +313,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		random.nextBytes(bytes);
 		return toHexString(bytes).toUpperCase();
 	}
-	
+
 	/** Helper method to throw new InvalidTimeException exception */
 	private void throwInvalidPhoneNumber() throws InvalidPhoneNumber_Exception {
 		String message = "Invalid phone number. It must have 9 digits.";
@@ -352,5 +361,6 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		faultInfo.setMessage(message);
 		throw new ConnectionAlreadyExists_Exception(message, faultInfo);
 	}
+	
 
 }

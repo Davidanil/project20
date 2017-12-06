@@ -22,7 +22,11 @@ import javax.swing.plaf.synth.SynthSeparatorUI;
 import java.util.TimerTask;
 
 import com.ist.sirs.child_locator.ws.FolloweeView;
+import com.ist.sirs.child_locator.ws.InvalidEmail_Exception;
 import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
+import com.ist.sirs.child_locator.ws.InvalidPassword_Exception;
+import com.ist.sirs.child_locator.ws.InvalidPhoneNumber_Exception;
+import com.sun.xml.fastinfoset.sax.SystemIdResolver;
 import com.ist.sirs.child_locator.ws.ConnectionAlreadyExists_Exception;
 
 public class ChildLocatorClientApp {
@@ -61,10 +65,13 @@ public class ChildLocatorClientApp {
 	}
 	
 	private static void sendCoordinates(String phone, double latitude, double longitude) {		
-		//latitude+=0.0000050;
-		System.out.println("Latitude: " + latitude + " Longitude: " + longitude);
-		//client.sendCoordinates(phone, latitude, longitude);
-        System.out.println("Sending coordinates");
+		//System.out.println("Latitude: " + latitude + " Longitude: " + longitude);
+		try {
+			client.sendCoordinates(phone, String.valueOf(latitude), String.valueOf(longitude));
+		} catch (Exception e) {
+			System.err.println("Failed to send coordinates: " + e.getMessage());
+		}
+        //System.out.println("Sending coordinates");
 	}
 	
 	public static double generateCoordinate() {
@@ -476,10 +483,11 @@ public class ChildLocatorClientApp {
 		
 	}
 
-	public static void checkFollowee(String phoneNumber) {
+	public static void checkFollowee(String phoneSon) throws IOException {
 		clearScreen();
-
-		System.out.println("BAZINGA");
+		String info = client.getCoordinates(getPhoneNumber(), phoneSon);
+		System.out.println(info);
+		System.in.read();
 	}
 
 	public static void addFollower() {

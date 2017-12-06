@@ -65,6 +65,16 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 	
 	@Override
+	public boolean sendCoordinates(String phone, String latitude, String longitude) {
+		return port.sendCoordinates(phone, latitude, longitude);
+	}
+	
+	@Override
+	public String getCoordinates(String phoneDad, String phoneSon) {
+		return port.getCoordinates(phoneDad, phoneSon);
+	}
+	
+	@Override
 	public String register(String phoneNumber, String email, String password1, String password2) 
 			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception, DifferentPasswords_Exception{
 		return port.register(phoneNumber, email, password1, password2);

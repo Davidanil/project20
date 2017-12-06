@@ -27,6 +27,12 @@
 			<xs:element name="getAddNonceResponse" type="tns:getAddNonceResponse" />
 			<xs:element name="addFollowee" type="tns:addFollowee" />
 			<xs:element name="addFolloweeResponse" type="tns:addFolloweeResponse" />
+			
+			<xs:element name="sendCoordinates" type="tns:sendCoordinates" />
+			<xs:element name="sendCoordinatesResponse" type="tns:sendCoordinatesResponse" />
+			
+			<xs:element name="getCoordinates" type="tns:getCoordinates" />
+			<xs:element name="getCoordinatesResponse" type="tns:getCoordinatesResponse" />
 
 			<!-- SOAP FAULTS -->
 			<xs:element name="InvalidLoginTime" type="tns:InvalidLoginTime" />
@@ -167,6 +173,32 @@
 					<xs:element name="message" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
+					
+			<xs:complexType name="sendCoordinates">
+				<xs:sequence>
+					<xs:element name="phone" type="xs:string"
+						minOccurs="0" />
+					<xs:element name="latitude" type="xs:string" minOccurs="0" />
+					<xs:element name="longitude" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="sendCoordinatesResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:boolean" />
+				</xs:sequence>
+			</xs:complexType>
+			
+			<xs:complexType name="getCoordinates">
+				<xs:sequence>
+					<xs:element name="phoneDad" type="xs:string" minOccurs="0" />
+					<xs:element name="phoneSon" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="getCoordinatesResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
 
 		</xs:schema>
 	</types>
@@ -221,7 +253,18 @@
 	<message name="addFolloweeResponse">
 		<part name="addFolloweeResponse" element="tns:addFolloweeResponse" />
 	</message>
-
+	<message name="sendCoordinates">
+		<part name="sendCoordinates" element="tns:sendCoordinates" />
+	</message>
+	<message name="sendCoordinatesResponse">
+		<part name="sendCoordinatesResponse" element="tns:sendCoordinatesResponse" />
+	</message>
+	<message name="getCoordinates">
+		<part name="getCoordinates" element="tns:getCoordinates" />
+	</message>
+	<message name="getCoordinatesResponse">
+		<part name="getCoordinatesResponse" element="tns:getCoordinatesResponse" />
+	</message>
 	<!-- SOAP FAULTS -->
 	<message name="InvalidLoginTime">
 		<part name="fault" element="tns:InvalidLoginTime" />
@@ -288,6 +331,17 @@
 			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
 			<fault name="InvalidNonce" message="tns:InvalidNonce" />
 		</operation>
+		
+		<operation name="sendCoordinates">
+			<input name="sendCoordinates" message="tns:sendCoordinates" />
+			<output name="sendCoordinatesResponse" message="tns:sendCoordinatesResponse" />
+		</operation>
+		
+		<operation name="getCoordinates">
+			<input name="getCoordinates" message="tns:getCoordinates" />
+			<output name="getCoordinatesResponse" message="tns:getCoordinatesResponse" />
+		</operation>
+		
 	</portType>
 
 	<binding name="ChildLocatorBinding" type="tns:ChildLocatorPortType">
@@ -394,6 +448,27 @@
 				<soap:fault name="InvalidNonce" use="literal" />
 			</fault>
 		</operation>
+		
+		<operation name="sendCoordinates">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		
+		<operation name="getCoordinates">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		
 	</binding>
 	<service name="ChildLocatorService">
 		<port name="ChildLocatorPort" binding="tns:ChildLocatorBinding">

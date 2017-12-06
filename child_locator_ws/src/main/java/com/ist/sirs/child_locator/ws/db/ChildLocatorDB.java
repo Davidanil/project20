@@ -59,11 +59,24 @@ public class ChildLocatorDB {
 	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
 	public boolean sendCoodinates(String phone, String latitude, String longitude) {
 		try{
-			PreparedStatement stmt = connection
-				.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
-		stmt.setString(1, phone);
-		stmt.setString(2, latitude);
-		stmt.setString(3, longitude);
+			PreparedStatement stmt0=connection.prepareStatement("SELECT phone FROM position WHERE phone=?");
+			stmt0.setString(1, phone);
+			ResultSet rs = stmt0.executeQuery();
+			PreparedStatement stmt;
+			if(!rs.next()) {//Se nao existir adiciona
+				stmt = connection
+						.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
+				stmt.setString(1, phone);
+				stmt.setString(2, latitude);
+				stmt.setString(3, longitude);
+			}
+			else { //else faz update
+				stmt = connection
+						.prepareStatement("UPDATE position SET latitude=?, longitude=?, timestamp=now() WHERE phone=?");
+				stmt.setString(1, latitude);
+				stmt.setString(2, longitude);
+				stmt.setString(3, phone);
+			}
 		return stmt.executeUpdate() == 1;
 		} catch (SQLException e) {
 			System.err.print(e.getMessage());
@@ -72,8 +85,7 @@ public class ChildLocatorDB {
 	}
 
 	public String getCoodinates(String phoneDad, String phoneSon) {
-		if (!isConnected(phoneDad, phoneSon))
-			return null;
+		if (!isConnected(phoneDad, phoneSon)) return null;
 
 		String latitude = null;
 		String longitude = null;

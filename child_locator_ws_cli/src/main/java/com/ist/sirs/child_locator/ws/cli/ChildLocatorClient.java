@@ -66,6 +66,15 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	public boolean confirmLogin(String code){
 		return port.confirmLogin(code);
 	}
+
+	public boolean sendCoordinates(String phone, String latitude, String longitude) {
+		return port.sendCoordinates(phone, latitude, longitude);
+	}
+	
+	@Override
+	public String getCoordinates(String phoneDad, String phoneSon) {
+		return port.getCoordinates(phoneDad, phoneSon);
+	}
 	
 	@Override
 	public String register(String phoneNumber, String email, String password1, String password2) 

@@ -55,16 +55,27 @@ public class ChildLocatorDB {
 		return rs;
 	}
 
-	// DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
 	public boolean sendCoodinates(String phone, String latitude, String longitude) {
-
 		try {
-			PreparedStatement stmt = connection
-					.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
-			stmt.setString(1, phone);
-			stmt.setString(2, latitude);
-			stmt.setString(3, longitude);
+			PreparedStatement stmt0 = connection.prepareStatement("SELECT phone FROM position WHERE phone=?");
+			stmt0.setString(1, phone);
+			ResultSet rs = stmt0.executeQuery();
+			PreparedStatement stmt;
+			if (!rs.next()) {// Se nao existir adiciona
+				stmt = connection.prepareStatement(
+						"INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
+				stmt.setString(1, phone);
+				stmt.setString(2, latitude);
+				stmt.setString(3, longitude);
+			} else { // else faz update
+				stmt = connection
+						.prepareStatement("UPDATE position SET latitude=?, longitude=?, timestamp=now() WHERE phone=?");
+				stmt.setString(1, latitude);
+				stmt.setString(2, longitude);
+				stmt.setString(3, phone);
+			}
 			return stmt.executeUpdate() == 1;
+
 		} catch (SQLException e) {
 			System.err.print(e.getMessage());
 			return false;
@@ -149,7 +160,7 @@ public class ChildLocatorDB {
 			return false;
 
 		try {
-			// 
+			//
 			PreparedStatement stmt0 = connection
 					.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");
 			stmt0.setString(1, phoneNumber);
@@ -159,14 +170,14 @@ public class ChildLocatorDB {
 			boolean hasNext = rs0.next();
 			System.out.println("HAS NEXT?: " + hasNext);
 			if (hasNext) {
-				PreparedStatement stmt1 = connection
-						.prepareStatement("UPDATE login SET attempts=0, lastlogin=?, loginregistercode=? WHERE phone=?");
+				PreparedStatement stmt1 = connection.prepareStatement(
+						"UPDATE login SET attempts=0, lastlogin=?, loginregistercode=? WHERE phone=?");
 				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 				stmt1.setTimestamp(1, timestamp);
 				stmt1.setString(2, loginCode);
 				stmt1.setString(3, phoneNumber);
 				stmt1.executeUpdate();
-				
+
 				return true;
 			} else {
 				PreparedStatement stmt2 = connection
@@ -181,7 +192,7 @@ public class ChildLocatorDB {
 			return false;
 		}
 	}
-	
+
 	public boolean confirmLogin(String phoneNumber, String code) {
 		try {
 			PreparedStatement stmt = connection
@@ -238,8 +249,9 @@ public class ChildLocatorDB {
 				return stmt1.executeUpdate() == 1;
 			}
 
-			PreparedStatement stmt2 = connection.prepareStatement(
-					"INSERT INTO login (phone,email,salt,password,lastlogin,loginregistercode) " + "VALUES(?,?,?,?,?,?)");
+			PreparedStatement stmt2 = connection
+					.prepareStatement("INSERT INTO login (phone,email,salt,password,lastlogin,loginregistercode) "
+							+ "VALUES(?,?,?,?,?,?)");
 			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 			stmt2.setString(1, phoneNumber);
 			stmt2.setString(2, email);
@@ -313,8 +325,8 @@ public class ChildLocatorDB {
 
 		return phoneNumbers;
 	}
-	
-	public List<String> getFollowers(String phoneNumber){
+
+	public List<String> getFollowers(String phoneNumber) {
 		List<String> phoneNumbers = new ArrayList<String>();
 		try {
 			PreparedStatement stmt = connection

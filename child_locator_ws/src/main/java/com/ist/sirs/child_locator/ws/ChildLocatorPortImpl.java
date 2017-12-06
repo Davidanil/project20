@@ -217,7 +217,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	}
 
 	// Checks if password has at least PASSNUM digits ["{"+ PASSNUM +",}"] and
-	// does not allow whitesapces ["(?=\\S+$)"]
+	// does not allow white spaces ["(?=\\S+$)"]
 	private boolean isPassword(String password) throws InvalidPassword_Exception {
 		Pattern pattern = Pattern.compile("^(?=\\S+$).{" + PASSNUMMIN + "," + PASSNUMMAX + "}$");
 		Matcher matcher = pattern.matcher(password);

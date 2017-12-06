@@ -128,8 +128,8 @@ public class ChildLocatorClientApp {
 		if (attempts > 3) {
 			try {
 				// wait e^(failedAttempts) minutes
-				double minutesToSleep = Math.pow(Math.E, attempts);
-				int millisToSleep = (int) minutesToSleep * 60 * 1000;
+				double minutesToSleep = Math.pow(Math.E, attempts-3);
+				int millisToSleep = (int) minutesToSleep * 60 * 10;
 				System.out.format("This is your %d attempt, so youll have to wait %f minutes " + "before retrying.\n",
 						attempts, minutesToSleep);
 				Thread.sleep(millisToSleep);
@@ -306,6 +306,7 @@ public class ChildLocatorClientApp {
 	public static void mainMenu(){
 		mainMenu("");
 	}
+	
 	public static void mainMenu(String message) {
 		Scanner scanner = new Scanner(System.in);
 		String option;
@@ -314,7 +315,7 @@ public class ChildLocatorClientApp {
 		clearScreen();
 		System.out.println("[MAIN MENU]");
 		if(message != null && message.length() > 0)
-			System.out.println("\n" + message+"\n");
+			System.out.println("\n\t[INFO] " + message+"\n");
 		System.out.println("What do you want to do?");
 		while (loop) {
 			System.out.println("\t1 - Get followees");
@@ -419,6 +420,7 @@ public class ChildLocatorClientApp {
 		String phoneNumber;
 		boolean loop = true;
 
+		clearScreen();
 		System.out.println("[ADD FOLLOWER]");
 		System.out.println("Insert phone number of whom you want to be followed by:  [q] to return to Main Menu");
 		while (loop) {
@@ -481,14 +483,13 @@ public class ChildLocatorClientApp {
 					client.addFollowee(phoneNumber, nonce);
 				
 				loop = false;
-
+				mainMenu("Followee added successfully");
+				
 			} catch (Exception e) {
 				System.out.println("[Add Follower] Exception: " + e.getMessage());
 			}
 		}
-
 		scanner.close();
-		mainMenu();
 	}
 
 	public static void removeFollowee() {

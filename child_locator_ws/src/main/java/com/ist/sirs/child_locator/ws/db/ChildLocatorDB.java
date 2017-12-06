@@ -57,7 +57,6 @@ public class ChildLocatorDB {
  
 	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
 	public boolean sendCoodinates(String phone, String latitude, String longitude) {
-		
 		try{
 			PreparedStatement stmt = connection
 				.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");

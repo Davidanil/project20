@@ -1,16 +1,25 @@
 package com.ist.sirs.child_locator.ws.cli;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.swing.plaf.synth.SynthSeparatorUI;
+
+import java.util.TimerTask;
 
 import com.ist.sirs.child_locator.ws.FolloweeView;
 import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
@@ -30,10 +39,68 @@ public class ChildLocatorClientApp {
 		// System.out.println(client.login("sheldon","bazinga"));
 
 		// check if its the first time user executes app
+		final String phone = getPhoneNumber();
+		System.out.println(phone);
+		java.util.Timer t = new java.util.Timer();
+		//double fixedLatitude = generateCoordinate();
+		
+		t.schedule(new TimerTask() {
+			private double fixedLatitude = generateCoordinate();
+			private double fixedLongitude = generateCoordinate();
+		            @Override
+		            public void run() {
+		        		double latitude = fixedLatitude;
+		        		double longitude = fixedLongitude;
+		        		fixedLatitude += 0.0000050 ;
+		        		sendCoordinates(phone, latitude, longitude);}}, 0, 1000);
+		
 		if (!(new File("src/main/resources/pin")).isFile())
 			createPin();
 		else
 			checkPin();
+	}
+	
+	private static void sendCoordinates(String phone, double latitude, double longitude) {		
+		//latitude+=0.0000050;
+		System.out.println("Latitude: " + latitude + " Longitude: " + longitude);
+		//client.sendCoordinates(phone, latitude, longitude);
+        System.out.println("Sending coordinates");
+	}
+	
+	public static double generateCoordinate() {
+		Random r=new Random();
+		String coord=null;
+		double random = Double.parseDouble(getRandomValue(r, 0, 180, 7).replace(',', '.'));
+		random-=90;
+		//coord=Double.toString(random);
+		return random;
+	}
+	
+	public static String getRandomValue(final Random random,
+		    final int lowerBound,
+		    final int upperBound,
+		    final int decimalPlaces){
+
+		    if(lowerBound < 0 || upperBound <= lowerBound || decimalPlaces < 0){
+		        throw new IllegalArgumentException("Put error message here");
+		    }
+
+		    final double dbl =
+		        ((random == null ? new Random() : random).nextDouble() //
+		            * (upperBound - lowerBound))
+		            + lowerBound;
+		    return String.format("%." + decimalPlaces + "f", dbl);
+
+		}
+
+	private static String getPhoneNumber() {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader("src/main/resources/phoneNumber"));
+			return br.readLine().trim();
+		} catch (IOException e) {
+			System.err.println("Your phone number is corrupt, restart the app: " + e.getMessage());
+			return null;
+		}
 	}
 
 	public static void createPin() {

@@ -54,6 +54,7 @@ public class ChildLocatorDB {
 
 		return rs;
 	}
+
  
 	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
 	public boolean sendCoodinates(String phone, String latitude, String longitude) {
@@ -69,26 +70,28 @@ public class ChildLocatorDB {
 			return false;
 		}
 	}
-	
+
 	public String getCoodinates(String phoneDad, String phoneSon) {
-		if(!isConnected(phoneDad, phoneSon)) return null;
-		
+		if (!isConnected(phoneDad, phoneSon))
+			return null;
+
 		String latitude = null;
 		String longitude = null;
 		Timestamp timestamp = null;
 		ResultSet rs = null;
-		
+
 		try {
-			PreparedStatement stmt2 = connection.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE phone=?");
-				stmt2.setString(1, phoneSon);
-				stmt2.executeUpdate();
-			
-				while (rs.next()) {
-					latitude = rs.getString("latitude");
-					longitude = rs.getString("latitude");
-					timestamp = rs.getTimestamp("timestamp");
-				}
-			String info = latitude + ";" + longitude + ";" +  timestamp;
+			PreparedStatement stmt2 = connection
+					.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE phone=?");
+			stmt2.setString(1, phoneSon);
+			stmt2.executeUpdate();
+
+			while (rs.next()) {
+				latitude = rs.getString("latitude");
+				longitude = rs.getString("latitude");
+				timestamp = rs.getTimestamp("timestamp");
+			}
+			String info = latitude + ";" + longitude + ";" + timestamp;
 			return info;
 
 		} catch (SQLException e) {
@@ -96,6 +99,7 @@ public class ChildLocatorDB {
 			return null;
 		}
 	}
+
 	private boolean isVerified(String phone) {
 		ResultSet rs=null;
 		try {
@@ -114,47 +118,58 @@ public class ChildLocatorDB {
 		return true;
 		
 	}
+
 	private boolean isConnected(String phoneSon, String phoneDad) {
 		PreparedStatement stmt;
-		String connected=null;
+		String connected = null;
 		try {
 			stmt = connection.prepareStatement("SELECT connected FROM connected WHERE phone=? AND phone2=?");
 			stmt.setString(1, phoneSon);
 			stmt.setString(2, phoneDad);
 			ResultSet rs = stmt.executeQuery();
-			
+
 			while (rs.next()) {
-				connected=rs.getString("connected");
+				connected = rs.getString("connected");
 			}
-		
+
 		} catch (SQLException e) {
 			System.err.print(e.getMessage());
 			return false;
 		}
-		if(!connected.equals("1")) return false;
-		
+		if (!connected.equals("1"))
+			return false;
+
 		return true;
-		
+
 	}
 
 	public boolean login(String phoneNumber, String email, String passwordHash) {
 		if(!isVerified(phoneNumber)) return false;
 		try {
-			PreparedStatement stmt = connection
-					.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");
+			// check if phonenumber exists in db
+			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
 			stmt.setString(1, phoneNumber);
-			stmt.setString(2, email);
-			stmt.setString(3, passwordHash);
 			ResultSet rs = stmt.executeQuery();
 			boolean hasNext = rs.next();
 
 			if (hasNext) {
-				PreparedStatement stmt1 = connection
-						.prepareStatement("UPDATE login SET attempts=0, lastlogin=? WHERE phone=?");
-				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-				stmt1.setTimestamp(1, timestamp);
-				stmt1.setString(2, phoneNumber);
-				stmt1.executeUpdate();
+				//
+				PreparedStatement stmt0 = connection
+						.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");
+				stmt0.setString(1, phoneNumber);
+				stmt0.setString(2, email);
+				stmt0.setString(3, passwordHash);
+				ResultSet rs0 = stmt0.executeQuery();
+				hasNext = rs0.next();
+
+				if (hasNext) {
+					PreparedStatement stmt1 = connection
+							.prepareStatement("UPDATE login SET attempts=0, lastlogin=? WHERE phone=?");
+					Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+					stmt1.setTimestamp(1, timestamp);
+					stmt1.setString(2, phoneNumber);
+					stmt1.executeUpdate();
+				}
 			} else {
 				PreparedStatement stmt2 = connection
 						.prepareStatement("UPDATE login SET attempts=attemps+1 WHERE phone=?");
@@ -269,7 +284,8 @@ public class ChildLocatorDB {
 	public List<String> getFollowees(String phoneNumber) {
 		List<String> phoneNumbers = new ArrayList<String>();
 		try {
-			PreparedStatement stmt = connection.prepareStatement("SELECT followeePhone FROM connected WHERE followerPhone=?");
+			PreparedStatement stmt = connection
+					.prepareStatement("SELECT followeePhone FROM connected WHERE followerPhone=?");
 			stmt.setString(1, phoneNumber);
 			ResultSet rs = stmt.executeQuery();
 
@@ -287,8 +303,8 @@ public class ChildLocatorDB {
 	// connection in db and already confirmed
 	public boolean isAlreadyFollowedBy(String followeePhoneNumber, String followerPhoneNumber) {
 		try {
-			PreparedStatement stmt = connection
-					.prepareStatement("SELECT connectid FROM connected WHERE followeePhone=? AND followerPhone=? AND connected=1");
+			PreparedStatement stmt = connection.prepareStatement(
+					"SELECT connectid FROM connected WHERE followeePhone=? AND followerPhone=? AND connected=1");
 			stmt.setString(1, followeePhoneNumber);
 			stmt.setString(2, followerPhoneNumber);
 			ResultSet rs = stmt.executeQuery();
@@ -331,8 +347,8 @@ public class ChildLocatorDB {
 	public boolean addFollowee(String followeePhoneNumber, String followerPhoneNumber, String nonce) {
 		try {
 			// check if connection already exists
-			PreparedStatement stmt0 = connection
-					.prepareStatement("SELECT connectid FROM connected WHERE followeePhone=? AND followerPhone=? AND nonce=?");
+			PreparedStatement stmt0 = connection.prepareStatement(
+					"SELECT connectid FROM connected WHERE followeePhone=? AND followerPhone=? AND nonce=?");
 			stmt0.setString(1, followeePhoneNumber);
 			stmt0.setString(2, followerPhoneNumber);
 			stmt0.setString(3, nonce);
@@ -341,8 +357,8 @@ public class ChildLocatorDB {
 
 			// update connected to 1
 			if (hasNext) {
-				PreparedStatement stmt1 = connection
-						.prepareStatement("UPDATE connected SET connected=1 WHERE followeePhone=? AND followerPhone=? AND nonce=?");
+				PreparedStatement stmt1 = connection.prepareStatement(
+						"UPDATE connected SET connected=1 WHERE followeePhone=? AND followerPhone=? AND nonce=?");
 				stmt1.setString(1, followeePhoneNumber);
 				stmt1.setString(2, followerPhoneNumber);
 				stmt1.setString(3, nonce);
@@ -372,8 +388,8 @@ public class ChildLocatorDB {
 
 			// update
 			if (rs.next()) {
-				PreparedStatement stmt1 = connection
-						.prepareStatement("UPDATE connected SET nonce=?, timestamp=NOW() WHERE followeePhone=? AND followerPhone=?");
+				PreparedStatement stmt1 = connection.prepareStatement(
+						"UPDATE connected SET nonce=?, timestamp=NOW() WHERE followeePhone=? AND followerPhone=?");
 				stmt1.setString(1, nonce);
 				stmt1.setString(2, followeePhoneNumber);
 				stmt1.setString(3, followerPhoneNumber);
@@ -383,8 +399,9 @@ public class ChildLocatorDB {
 			}
 
 			// insert
-			PreparedStatement stmt2 = connection.prepareStatement(
-					"INSERT INTO connected(followeePhone, followerPhone, connected, nonce, timestamp)" + "VALUES(?,?,0,?,NOW())");
+			PreparedStatement stmt2 = connection
+					.prepareStatement("INSERT INTO connected(followeePhone, followerPhone, connected, nonce, timestamp)"
+							+ "VALUES(?,?,0,?,NOW())");
 			stmt2.setString(1, followeePhoneNumber);
 			stmt2.setString(2, followerPhoneNumber);
 			stmt2.setString(3, nonce);

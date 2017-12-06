@@ -34,7 +34,7 @@ Edited on 30/11/2017:
   </tr>
   <tr>
     <td colspan="2">Nonces (register/add devices)</td>
-	<td>Message Hashes</td>
+	<td><s>Message Hashes</s></td>
   </tr>
   <tr>
     <td colspan="3">2factor authentication / reauthentication</td>

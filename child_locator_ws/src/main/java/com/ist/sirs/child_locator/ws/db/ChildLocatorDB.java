@@ -55,17 +55,16 @@ public class ChildLocatorDB {
 		return rs;
 	}
 
- 
-	//DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
+	// DAVID AQUI! FIXME PUT ME ON WSDL DUDE!
 	public boolean sendCoodinates(String phone, String latitude, String longitude) {
-		
-		try{
+
+		try {
 			PreparedStatement stmt = connection
-				.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
-		stmt.setString(1, phone);
-		stmt.setString(2, latitude);
-		stmt.setString(3, longitude);
-		return stmt.executeUpdate() == 1;
+					.prepareStatement("INSERT INTO position (phone,latitude,longitude,timestamp) VALUES(?,?,?,now())");
+			stmt.setString(1, phone);
+			stmt.setString(2, latitude);
+			stmt.setString(3, longitude);
+			return stmt.executeUpdate() == 1;
 		} catch (SQLException e) {
 			System.err.print(e.getMessage());
 			return false;
@@ -102,22 +101,23 @@ public class ChildLocatorDB {
 	}
 
 	private boolean isVerified(String phone) {
-		ResultSet rs=null;
+		ResultSet rs = null;
 		try {
-		PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
-		stmt.setString(1, phone);
-		rs = stmt.executeQuery();
-		
-		if (!rs.next()) return false;
-		if (!rs.getString("verified").equals("1")) return false;
-		}
-		catch (SQLException e) {
+			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
+			stmt.setString(1, phone);
+			rs = stmt.executeQuery();
+
+			if (!rs.next())
+				return false;
+			if (!rs.getString("verified").equals("1"))
+				return false;
+		} catch (SQLException e) {
 			System.err.print(e.getMessage());
 			return false;
 		}
-		
+
 		return true;
-		
+
 	}
 
 	private boolean isConnected(String phoneSon, String phoneDad) {
@@ -144,46 +144,59 @@ public class ChildLocatorDB {
 
 	}
 
-	public boolean login(String phoneNumber, String email, String passwordHash) {
-		if(!isVerified(phoneNumber)) return false;
+	public boolean login(String phoneNumber, String email, String passwordHash, String loginCode) {
+		if (!isVerified(phoneNumber))
+			return false;
+
 		try {
-			// check if phonenumber exists in db
-			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
-			stmt.setString(1, phoneNumber);
-			ResultSet rs = stmt.executeQuery();
-			boolean hasNext = rs.next();
-
+			// 
+			PreparedStatement stmt0 = connection
+					.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");
+			stmt0.setString(1, phoneNumber);
+			stmt0.setString(2, email);
+			stmt0.setString(3, passwordHash);
+			ResultSet rs0 = stmt0.executeQuery();
+			boolean hasNext = rs0.next();
+			System.out.println("HAS NEXT?: " + hasNext);
 			if (hasNext) {
-				//
-				PreparedStatement stmt0 = connection
-						.prepareStatement("SELECT * FROM login WHERE phone=? AND email=? AND password=?");
-				stmt0.setString(1, phoneNumber);
-				stmt0.setString(2, email);
-				stmt0.setString(3, passwordHash);
-				ResultSet rs0 = stmt0.executeQuery();
-				hasNext = rs0.next();
-
-				if (hasNext) {
-					PreparedStatement stmt1 = connection
-							.prepareStatement("UPDATE login SET attempts=0, lastlogin=? WHERE phone=?");
-					Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-					stmt1.setTimestamp(1, timestamp);
-					stmt1.setString(2, phoneNumber);
-					stmt1.executeUpdate();
-				}
+				PreparedStatement stmt1 = connection
+						.prepareStatement("UPDATE login SET attempts=0, lastlogin=?, loginregistercode=? WHERE phone=?");
+				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+				stmt1.setTimestamp(1, timestamp);
+				stmt1.setString(2, loginCode);
+				stmt1.setString(3, phoneNumber);
+				stmt1.executeUpdate();
+				
+				return true;
 			} else {
 				PreparedStatement stmt2 = connection
-						.prepareStatement("UPDATE login SET attempts=attemps+1 WHERE phone=?");
+						.prepareStatement("UPDATE login SET attempts=attempts+1 WHERE phone=?");
 				stmt2.setString(1, phoneNumber);
 				stmt2.executeUpdate();
+				return false;
 			}
-
-			return hasNext;
 
 		} catch (SQLException e) {
 			System.err.print(e.getMessage());
 			return false;
 		}
+	}
+	
+	public boolean confirmLogin(String phoneNumber, String code) {
+		try {
+			PreparedStatement stmt = connection
+					.prepareStatement("SELECT phone FROM login WHERE phone=? AND loginregistercode=?");
+			stmt.setString(1, phoneNumber);
+			stmt.setString(2, code);
+			ResultSet rs = stmt.executeQuery();
+
+			return rs.next();
+
+		} catch (SQLException e) {
+			System.out.println("[DB - confirmLogin] Exception - " + e.getMessage());
+		}
+
+		return false;
 	}
 
 	public String getSalt(String phoneNumber) {
@@ -202,7 +215,7 @@ public class ChildLocatorDB {
 		return salt;
 	}
 
-	public boolean register(String phoneNumber, String email, String salt, String hash, String registerCode) {
+	public boolean register(String phoneNumber, String email, String salt, String hash, String loginregistercode) {
 		try {
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
 			stmt.setString(1, phoneNumber);
@@ -216,24 +229,24 @@ public class ChildLocatorDB {
 				// user registered but never verified: update nounce and
 				// lastlogin and return nonce
 				PreparedStatement stmt1 = connection
-						.prepareStatement("UPDATE login SET lastlogin=?, registercode=? WHERE phone=?");
+						.prepareStatement("UPDATE login SET lastlogin=?, loginregistercode=? WHERE phone=?");
 				Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 				stmt1.setTimestamp(1, timestamp);
-				stmt1.setString(2, registerCode);
+				stmt1.setString(2, loginregistercode);
 				stmt1.setString(3, phoneNumber);
 
 				return stmt1.executeUpdate() == 1;
 			}
 
 			PreparedStatement stmt2 = connection.prepareStatement(
-					"INSERT INTO login (phone,email,salt,password,lastlogin,registercode) " + "VALUES(?,?,?,?,?,?)");
+					"INSERT INTO login (phone,email,salt,password,lastlogin,loginregistercode) " + "VALUES(?,?,?,?,?,?)");
 			Timestamp timestamp = new Timestamp(System.currentTimeMillis());
 			stmt2.setString(1, phoneNumber);
 			stmt2.setString(2, email);
 			stmt2.setString(3, salt);
 			stmt2.setString(4, hash);
 			stmt2.setTimestamp(5, timestamp);
-			stmt2.setString(6, registerCode);
+			stmt2.setString(6, loginregistercode);
 			return stmt2.executeUpdate() == 1;
 
 		} catch (SQLException e) {
@@ -246,7 +259,7 @@ public class ChildLocatorDB {
 	public boolean confirmRegistration(String phoneNumber, String code) {
 		try {
 			PreparedStatement stmt = connection
-					.prepareStatement("SELECT phone FROM login WHERE phone=? AND registercode=?");
+					.prepareStatement("SELECT phone FROM login WHERE phone=? AND loginregistercode=?");
 			stmt.setString(1, phoneNumber);
 			stmt.setString(2, code);
 			ResultSet rs = stmt.executeQuery();
@@ -296,6 +309,25 @@ public class ChildLocatorDB {
 
 		} catch (SQLException e) {
 			System.out.println("[DB - getFollowees] Exception - " + e.getMessage());
+		}
+
+		return phoneNumbers;
+	}
+	
+	public List<String> getFollowers(String phoneNumber){
+		List<String> phoneNumbers = new ArrayList<String>();
+		try {
+			PreparedStatement stmt = connection
+					.prepareStatement("SELECT followerPhone FROM connected WHERE followeePhone=?");
+			stmt.setString(1, phoneNumber);
+			ResultSet rs = stmt.executeQuery();
+
+			while (rs.next()) {
+				phoneNumbers.add(rs.getString("followerPhone"));
+			}
+
+		} catch (SQLException e) {
+			System.out.println("[DB - getFollowers] Exception - " + e.getMessage());
 		}
 
 		return phoneNumbers;
@@ -415,40 +447,4 @@ public class ChildLocatorDB {
 			return false;
 		}
 	}
-
-	// Print login table
-	public static void printLoginTable(ResultSet rs) throws SQLException {
-		System.out.println("-----Login Table-----");
-		System.out.println(" phone| email| salt| pass| attempts| verified");
-		while (rs.next()) {
-			String phone = rs.getString("phone");
-			String email = rs.getString("email");
-			String salt = rs.getString("salt");
-			String pass = rs.getString("password");
-			int attempts = rs.getInt("attempts");
-			int verified = rs.getInt("verified");
-			Timestamp lastlogin = rs.getTimestamp("lastlogin");
-			// print the results
-			System.out.format("%s| %s| %s| %s| %s| %s| %s\n", phone, email, salt, pass, attempts, verified, lastlogin);
-		}
-		System.out.println("-------------------------");
-	}
-
-	// Print connected table
-	public static void printConnectedTable(ResultSet rs) throws SQLException {
-		System.out.println("-----Connected Table-----");
-		System.out.println(" connectid| phone| phone2| connected| nonce| timestamp");
-		while (rs.next()) {
-			int connectid = rs.getInt("connectid");
-			String phone = rs.getString("phone");
-			String phone2 = rs.getString("phone2");
-			int connected = rs.getInt("connected");
-			int nonce = rs.getInt("nonce");
-			Timestamp timestamp = rs.getTimestamp("timestamp");
-			// print the results
-			System.out.format(" %s| %s| %s| %s| %s| %s\n", connectid, phone, phone2, connected, nonce, timestamp);
-		}
-		System.out.println("-------------------------");
-	}
-
 }

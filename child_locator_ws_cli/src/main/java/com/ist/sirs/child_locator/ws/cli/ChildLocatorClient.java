@@ -57,11 +57,14 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 
 	@Override
-	public boolean login(String phoneNumber, String email, String password) 
+	public String login(String phoneNumber, String email, String password) 
 			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception{
-		Date date = new Date();
-		Timestamp ts = new Timestamp(date.getTime());
 		return port.login(phoneNumber, email, password);
+	}
+	
+	@Override
+	public boolean confirmLogin(String code){
+		return port.confirmLogin(code);
 	}
 	
 	@Override
@@ -78,6 +81,11 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	@Override
 	public List<FolloweeView> getFollowees(){
 		return port.getFollowees();
+	}
+	
+	@Override
+	public List<String> getFollowers(){
+		return port.getFollowers();
 	}
 	
 	@Override

@@ -58,7 +58,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 		try {
 			if (outboundElement.booleanValue()) { // Add time stamp header
-				//System.out.println("Writing header in outbound SOAP message...");
+				System.out.println("Writing header in outbound SOAP message...");
 				
 				// get SOAP envelope
 				SOAPMessage msg = smc.getMessage();
@@ -69,7 +69,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				SOAPHeader sh = se.getHeader();
 				if (sh == null)
 					sh = se.addHeader();
-
+				
 				// add header element (name, namespace prefix, namespace)
 				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
 				SOAPHeaderElement element = sh.addHeaderElement(name);
@@ -80,7 +80,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 				element.addTextNode(valueString);
 			}
 			else{ // Check time stamp
-				//System.out.println("Reading header in inbound SOAP message...");
+				System.out.println("Reading header in inbound SOAP message...");
 				
 				// get SOAP envelope header
 				SOAPMessage msg = smc.getMessage();
@@ -93,7 +93,7 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 					System.out.println("Header not found.");
 					return true;
 				}
-
+				
 				// get first header element
 				Name name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
 				Iterator<?> it = sh.getChildElements(name);
@@ -103,11 +103,11 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 					return true;
 				}
 				SOAPElement element = (SOAPElement) it.next();
-
+				
 				// get header element value
 				String valueString = element.getValue();
-
 				Timestamp timestamp = Timestamp.valueOf(valueString);
+
 				// put header in a property context
 				smc.put(CONTEXT_PROPERTY, timestamp);
 				// set property scope to application client/server class can
@@ -116,16 +116,16 @@ public class TimeHandler implements SOAPHandler<SOAPMessageContext> {
 
 				int seconds = 0;
 				Properties prop = new Properties();
+
 				try{
 					prop.load(TimeHandler.class.getResourceAsStream("/config.properties"));
 					seconds = Integer.parseInt(prop.getProperty("freshnessTimeout"));
 				} catch(IOException ioe){
-					System.out.println(ioe);
+					System.out.println("[IOException - TimeHandler - Inbound] " + ioe.getMessage());
 				}
-
+				
 				//Add x seconds to timestamp
 				Timestamp interval = new Timestamp(timestamp.getTime() + seconds * 1000);
-
 				if(interval.before(new Timestamp(System.currentTimeMillis()))) // time > X sec, error
 				   throw new RuntimeException(String.format("Time exceeded %d seconds.",seconds));
             

@@ -208,8 +208,9 @@ public class ChildLocatorClientApp {
 				System.out.print("Password: ");
 				password = scanner.next();
 
-				// TODO: check if user can login (e^c)
-				if (client.login(phoneNumber, email, password)) {
+				String loginCode = client.login(phoneNumber, email, password);
+				if(loginCode != null) {
+					confirmLogin(phoneNumber, loginCode);
 					mainMenu();
 					loop = false;
 				} else {
@@ -219,6 +220,46 @@ public class ChildLocatorClientApp {
 
 			} catch (Exception e) {
 				System.out.println("[Login] Exception: " + e.getMessage());
+			}
+		}
+
+		scanner.close();
+	}
+	
+	public static void confirmLogin(String phoneNumber, String loginCode){
+		Scanner scanner = new Scanner(System.in);
+		String inputCode;
+		boolean loop = true;
+
+		clearScreen();
+		System.out.println("[CONFIRM LOGIN]");
+		System.out.println("Confirm your login by submiting the code send via sms.");
+
+		try {
+			// open texteditor with mocked sms
+			String[] cmds = { "/bin/sh", "-c", "echo '[SMS]\nLogin Code: " + loginCode + "' | open -f" };
+			Process p = Runtime.getRuntime().exec(cmds);
+			p.waitFor();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		while (loop) {
+			try {
+				System.out.print("Login Code: ");
+				inputCode = scanner.next();
+
+				if (client.confirmLogin(inputCode)) {
+					mainMenu();
+					loop = false;
+				} else
+					System.out.println("Wrong info, try again:");
+			} catch (Exception e) {
+				System.out.println("[ConfirmLogin] Exception: " + e.getMessage());
 			}
 		}
 
@@ -359,8 +400,8 @@ public class ChildLocatorClientApp {
 		List<FolloweeView> followees = client.getFollowees();
 
 		clearScreen();
-		System.out.println("[CHECK FOLLOWEES]");
-		System.out.println("List of people you are following");
+		System.out.println("[GET FOLLOWEES]");
+		System.out.println("You are following " + followees.size() + " people:");
 		for (int i = 0; i < followees.size(); i++) {
 			System.out.println("\t" + (i + 1) + " - " + followees.get(i).getPhoneNumber());
 		}
@@ -406,7 +447,23 @@ public class ChildLocatorClientApp {
 	}
 
 	public static void getFollowers() {
+		List<String> followers = client.getFollowers();
+
+		clearScreen();
+		System.out.println("[GET FOLLOWERS]");
+		System.out.println("You are being followed by " + followers.size() + " people:");
+		for (int i = 0; i < followers.size(); i++) {
+			System.out.println("\t" + (i + 1) + " - " + followers.get(i));
+		}
 		
+		System.out.println("\n\nPress any key to return to Main Menu.");
+		try {
+			System.in.read();
+		} catch (IOException e) {
+
+		} finally{
+			mainMenu();
+		}
 	}
 
 	public static void checkFollowee(String phoneNumber) {

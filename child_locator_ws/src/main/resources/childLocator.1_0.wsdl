@@ -17,12 +17,16 @@
 			<xs:element name="printResponse" type="tns:printResponse" />
 			<xs:element name="login" type="tns:login" />
 			<xs:element name="loginResponse" type="tns:loginResponse" />
+			<xs:element name="confirmLogin" type="tns:confirmLogin" />
+			<xs:element name="confirmLoginResponse" type="tns:confirmLoginResponse" />
 			<xs:element name="register" type="tns:register" />
 			<xs:element name="registerResponse" type="tns:registerResponse" />
 			<xs:element name="confirmRegistration" type="tns:confirmRegistration" />
 			<xs:element name="confirmRegistrationResponse" type="tns:confirmRegistrationResponse" />
 			<xs:element name="getFollowees" type="tns:getFollowees" />
 			<xs:element name="getFolloweesResponse" type="tns:getFolloweesResponse" />
+			<xs:element name="getFollowers" type="tns:getFollowers" />
+			<xs:element name="getFollowersResponse" type="tns:getFollowersResponse" />
 			<xs:element name="getAddNonce" type="tns:getAddNonce" />
 			<xs:element name="getAddNonceResponse" type="tns:getAddNonceResponse" />
 			<xs:element name="addFollowee" type="tns:addFollowee" />
@@ -57,6 +61,18 @@
 				</xs:sequence>
 			</xs:complexType>
 			<xs:complexType name="loginResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string" minOccurs="0"/>
+				</xs:sequence>
+			</xs:complexType>
+			
+			<xs:complexType name="confirmLogin">
+				<xs:sequence>
+					<xs:element name="code" type="xs:string"
+						minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="confirmLoginResponse">
 				<xs:sequence>
 					<xs:element name="return" type="xs:boolean" />
 				</xs:sequence>
@@ -95,6 +111,16 @@
 			<xs:complexType name="getFolloweesResponse">
 				<xs:sequence>
 					<xs:element name="followees" type="tns:followeeView"
+						minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+			</xs:complexType>
+			
+			<xs:complexType name="getFollowers">
+				<xs:sequence />
+			</xs:complexType>
+			<xs:complexType name="getFollowersResponse">
+				<xs:sequence>
+					<xs:element name="return" type="xs:string"
 						minOccurs="0" maxOccurs="unbounded" />
 				</xs:sequence>
 			</xs:complexType>
@@ -186,6 +212,13 @@
 	<message name="loginResponse">
 		<part name="loginResponse" element="tns:loginResponse" />
 	</message>
+	
+	<message name="confirmLogin">
+		<part name="confirmLogin" element="tns:confirmLogin" />
+	</message>
+	<message name="confirmLoginResponse">
+		<part name="confirmLoginResponse" element="tns:confirmLoginResponse" />
+	</message>
 
 	<message name="register">
 		<part name="register" element="tns:register" />
@@ -207,6 +240,14 @@
 	<message name="getFolloweesResponse">
 		<part name="getFolloweesResponse" element="tns:getFolloweesResponse" />
 	</message>
+	
+	<message name="getFollowers">
+		<part name="getFollowers" element="tns:getFollowers" />
+	</message>
+	<message name="getFollowersResponse">
+		<part name="getFollowersResponse" element="tns:getFollowersResponse" />
+	</message>
+
 
 	<message name="getAddNonce">
 		<part name="getAddNonce" element="tns:getAddNonce" />
@@ -259,6 +300,10 @@
 			<fault name="InvalidEmail" message="tns:InvalidEmail" />
 			<fault name="InvalidPassword" message="tns:InvalidPassword" />
 		</operation>
+		<operation name="confirmLogin">
+			<input name="confirmLogin" message="tns:confirmLogin" />
+			<output name="confirmLoginResponse" message="tns:confirmLoginResponse" />
+		</operation>
 		<operation name="register">
 			<input name="register" message="tns:register" />
 			<output name="registerResponse" message="tns:registerResponse" />
@@ -276,6 +321,11 @@
 			<input name="getFollowees" message="tns:getFollowees" />
 			<output name="getFolloweesResponse" message="tns:getFolloweesResponse" />
 		</operation>
+		<operation name="getFollowers">
+			<input name="getFollowers" message="tns:getFollowers" />
+			<output name="getFollowersResponse" message="tns:getFollowersResponse" />
+		</operation>
+		
 		<operation name="getAddNonce">
 			<input name="getAddNonce" message="tns:getAddNonce" />
 			<output name="getAddNonceResponse" message="tns:getAddNonceResponse" />
@@ -323,6 +373,15 @@
 				<soap:fault name="InvalidPassword" use="literal" />
 			</fault>
 		</operation>
+		<operation name="confirmLogin">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
 		<operation name="register">
 			<soap:operation soapAction="" />
 			<input>
@@ -354,6 +413,15 @@
 			</output>
 		</operation>
 		<operation name="getFollowees">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+		</operation>
+		<operation name="getFollowers">
 			<soap:operation soapAction="" />
 			<input>
 				<soap:body use="literal" />

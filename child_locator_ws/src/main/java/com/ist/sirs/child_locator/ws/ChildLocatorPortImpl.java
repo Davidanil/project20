@@ -59,16 +59,26 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	}
 
 	@Override
-	public boolean login(String phoneNumber, String email, String password)
+	public String login(String phoneNumber, String email, String password)
 			throws InvalidPhoneNumber_Exception, InvalidEmail_Exception, InvalidPassword_Exception {
 		if (isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)) {
 			// salt and hash password
 			String salt = db.getSalt(phoneNumber);
 			byte[] hashedPassword = hashPassword(password, ToByteArray(salt));
-			return db.login(phoneNumber, email, toHexString(hashedPassword));
+			
+			String loginCode = generateNonce();
+			if(db.login(phoneNumber, email, toHexString(hashedPassword), loginCode))
+				return loginCode;
 		}
 
-		return false;
+		return null;
+	}
+	
+	@Override
+	public boolean confirmLogin(String code){
+		String phoneNumber = getPhoneNumberFromHandler();
+		
+		return db.confirmLogin(phoneNumber, code);
 	}
 
 	@Override
@@ -109,7 +119,15 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		}
 
 		return followeesList;
+	}
+	
+	@Override
+	public List<String> getFollowers(){
+		String phoneNumber = getPhoneNumberFromHandler();
 
+		List<String> followers = db.getFollowers(phoneNumber);
+	
+		return followers;
 	}
 
 	@Override

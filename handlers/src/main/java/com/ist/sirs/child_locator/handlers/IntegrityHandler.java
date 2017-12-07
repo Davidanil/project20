@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
 
+import javax.xml.bind.DatatypeConverter;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.Name;
@@ -16,8 +17,10 @@ import javax.xml.ws.handler.MessageContext;
 import javax.xml.ws.handler.soap.SOAPHandler;
 import javax.xml.ws.handler.soap.SOAPMessageContext;
 
-import java.io.ByteArrayOutputStream;
 
+
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 
 
@@ -71,21 +74,26 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 	private void handleIntegrity(SOAPMessageContext smc) {
 		//System.out.println("IntegrityHandler: Handling message.");
 
-		byte[] message = null;
+		byte[] base64Message = null;
 		MessageDigest md = null;
 		try {
-			message = getBody(smc).getBytes("UTF-8");
+			String message = getBody(smc);
+			base64Message = DatatypeConverter.parseBase64Binary(message);
 			md = MessageDigest.getInstance("MD5");
 		} catch (Exception e) {System.out.println(e);}
-		byte[] hash = md.digest(message); // hashed
+		byte[] hash = md.digest(base64Message); // hashed
+		String hashString = DatatypeConverter.printBase64Binary(hash);
 		
 		Boolean outbound = (Boolean) smc.get(MessageContext.MESSAGE_OUTBOUND_PROPERTY);
 		
 		if (outbound){	// Add Hash
-			AddHeader(smc, Arrays.toString(hash));
+			//System.out.println("[OUTBOUND INTEGRITY HANDLER] hashString: " + hashString);
+			AddHeader(smc, hashString);
 		}
-		else if(!CompareHash(smc, Arrays.toString(hash))){ // Compare hash
-			throw new RuntimeException(String.format("Message hashes don't match.")); // Error
+		else{
+			
+			if(!CompareHash(smc, hashString)) // Compare hash
+				throw new RuntimeException(String.format("Message hashes don't match.")); // Error
 		}
 	}
 	
@@ -120,6 +128,7 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 			sh = se.getHeader();
 			if (sh == null)
 				sh = se.addHeader();
+			
 			name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
 			SOAPHeaderElement element = sh.addHeaderElement(name);
 			// add header hash
@@ -144,7 +153,9 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 				return false;
 			}
 			name = se.createName(HandlerName, HandlerPrefix, HandlerNamespace);
-		} catch (Exception e) {System.out.println(e);}
+		} catch (Exception e) {
+			System.out.println(e);
+			}
 
 		Iterator<?> it = sh.getChildElements(name);
 		// check header element
@@ -155,6 +166,9 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 		SOAPElement element = (SOAPElement) it.next();
 		// get hash
 		String valueString = element.getValue();
+		
+		//System.out.println("[INBOUND INTEGRITY HANDLER] hashString: " + valueString);
+		
 		// compare hashes
 		return valueString.equals(hash);
 	}

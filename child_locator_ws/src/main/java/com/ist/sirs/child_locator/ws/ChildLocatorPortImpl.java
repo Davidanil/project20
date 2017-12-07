@@ -37,6 +37,8 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 
 	private ChildLocatorDB db;
 	
+	private HashMap<String, SecretKey> keys = new HashMap<String, SecretKey>();
+	
 	private ChildLocatorPortImpl() {
 		db = ChildLocatorDB.getInstance();
 	}
@@ -56,6 +58,30 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		if (!validLoginTime())
 			throwInvalidLoginTimeException("Your last login was over a day ago, you need to re-login.");
 		return "bazinga";
+	}
+	
+	@Override
+	public String createChannel(String phoneNumber, String publicKey){
+		SecretKey secretKey = null;
+		byte[] keyBytes = null;
+		PublicKey publickey = null;
+		Cipher cipher = null;
+		System.out.println("begin");
+		if(keys.get(phoneNumber) != null) //number already exists
+			return null;
+		try {
+			// decode public key from string
+			publickey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
+			// generate Symmetric key
+			secretKey = KeyGenerator.getInstance("AES").generateKey();
+			//encrypt Symmetric key
+			cipher = Cipher.getInstance("RSA");
+	        cipher.init(Cipher.PUBLIC_KEY, publickey);
+	        System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
+	        keyBytes = cipher.doFinal(secretKey.getEncoded());
+		} catch (Exception e) { System.out.println(e);}
+		keys.put(phoneNumber, secretKey); // add key to hash map
+		return Base64.getEncoder().encodeToString(keyBytes);
 	}
 
 	@Override

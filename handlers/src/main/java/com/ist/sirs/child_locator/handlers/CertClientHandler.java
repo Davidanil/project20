@@ -79,10 +79,9 @@ public class CertClientHandler implements SOAPHandler<SOAPMessageContext> {
 				SOAPHeader sh = se.getHeader();				
 					
 				//Get client private key
-				System.out.println("\n\nBEFORE KEYSTORE\n\n");
 				PrivateKey privateKey = CertUtil.getPrivateKeyFromKeyStoreResource(KEYSTORE,
 						KEYSTORE_PASSWORD.toCharArray(), KEY_ALIAS, KEY_PASSWORD.toCharArray());
-				System.out.println("\n\nAFTER KEYSTORE\n\n");
+
 				//Get digest from header of soap envelope
 				Name name = se.createName(IntegrityHandlerName, IntegrityHandlerPrefix, IntegrityHandlerNamespace);
 				Iterator<?> it = sh.getChildElements(name);
@@ -113,10 +112,8 @@ public class CertClientHandler implements SOAPHandler<SOAPMessageContext> {
 				SOAPHeader sh = se.getHeader();	
 				
 				//get server certificate
-				System.out.println("\n\nBEFORE CERTIFICATE\n\n");
 				String serverCertName = "server.cer";
 				Certificate serverCert = CertUtil.getX509CertificateFromResource(serverCertName);
-				System.out.println("\n\nAFTER CERTIFICATE\n\n");
 				if(serverCert == null){
 					return true;
 				}

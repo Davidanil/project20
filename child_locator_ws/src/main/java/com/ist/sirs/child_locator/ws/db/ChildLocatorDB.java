@@ -93,7 +93,7 @@ public class ChildLocatorDB {
 
 		try {
 			PreparedStatement stmt2 = connection
-					.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE phone=?");
+					.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE followeePhone=?");
 			stmt2.setString(1, phoneSon);
 			stmt2.executeUpdate();
 
@@ -111,7 +111,7 @@ public class ChildLocatorDB {
 		}
 	}
 
-	private boolean isVerified(String phone) {
+	public boolean isVerified(String phone) {
 		ResultSet rs = null;
 		try {
 			PreparedStatement stmt = connection.prepareStatement("SELECT * FROM login WHERE phone=?");
@@ -135,7 +135,7 @@ public class ChildLocatorDB {
 		PreparedStatement stmt;
 		String connected = null;
 		try {
-			stmt = connection.prepareStatement("SELECT connected FROM connected WHERE phone=? AND phone2=?");
+			stmt = connection.prepareStatement("SELECT connected FROM connected WHERE followeePhone=? AND followerPhone=?");
 			stmt.setString(1, phoneSon);
 			stmt.setString(2, phoneDad);
 			ResultSet rs = stmt.executeQuery();
@@ -148,7 +148,7 @@ public class ChildLocatorDB {
 			System.err.print(e.getMessage());
 			return false;
 		}
-		if (!connected.equals("1"))
+		if (connected == null || !connected.equals("1"))
 			return false;
 
 		return true;
@@ -156,9 +156,7 @@ public class ChildLocatorDB {
 	}
 
 	public boolean login(String phoneNumber, String email, String passwordHash, String loginCode) {
-		if (!isVerified(phoneNumber))
-			return false;
-
+		
 		try {
 			//
 			PreparedStatement stmt0 = connection
@@ -168,7 +166,6 @@ public class ChildLocatorDB {
 			stmt0.setString(3, passwordHash);
 			ResultSet rs0 = stmt0.executeQuery();
 			boolean hasNext = rs0.next();
-			System.out.println("HAS NEXT?: " + hasNext);
 			if (hasNext) {
 				PreparedStatement stmt1 = connection.prepareStatement(
 						"UPDATE login SET attempts=0, lastlogin=?, loginregistercode=? WHERE phone=?");
@@ -402,6 +399,7 @@ public class ChildLocatorDB {
 
 			// update connected to 1
 			if (hasNext) {
+				System.out.println("ADD FOLLOWEE NONCE MATCHING");
 				PreparedStatement stmt1 = connection.prepareStatement(
 						"UPDATE connected SET connected=1 WHERE followeePhone=? AND followerPhone=? AND nonce=?");
 				stmt1.setString(1, followeePhoneNumber);

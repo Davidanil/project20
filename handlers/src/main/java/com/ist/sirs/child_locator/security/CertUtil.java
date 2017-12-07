@@ -53,7 +53,7 @@ public class CertUtil {
 		// check if we already have the certificate needed
 		File f = new File(certName + ".cer");
 		boolean hasCert = f.isFile();
-		System.out.println("HAS CERT???: " + hasCert);
+
 		if (hasCert)
 			cert = getX509CertificateFromResource(certName + ".cer");
 		// // get public key from CA Certificate
@@ -148,7 +148,6 @@ public class CertUtil {
 	private static KeyStore readKeystoreFromStream(InputStream keyStoreInputStream, char[] keyStorePassword)
 			throws KeyStoreException {
 		KeyStore keystore = KeyStore.getInstance(KeyStore.getDefaultType());
-		System.out.println("STRING KEY STORE: ");
 		try {
 			keystore.load(keyStoreInputStream, keyStorePassword);
 		} catch (NoSuchAlgorithmException | CertificateException | IOException e) {

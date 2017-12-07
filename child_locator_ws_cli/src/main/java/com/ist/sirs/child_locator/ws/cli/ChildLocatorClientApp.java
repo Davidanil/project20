@@ -287,7 +287,8 @@ public class ChildLocatorClientApp {
 
 				String loginCode = client.login(phoneNumber, email, password);
 				if(loginCode != null) {
-					confirmLogin(phoneNumber, loginCode);
+					if(loginCode.length() != 0)
+						confirmLogin(phoneNumber, loginCode);
 					mainMenu();
 					loop = false;
 				} else {
@@ -345,6 +346,7 @@ public class ChildLocatorClientApp {
 		boolean loop = true;
 
 		clearScreen();
+		System.out.println("[REGISTER]");
 		System.out.println("Provide your info:");
 
 		while (loop) {

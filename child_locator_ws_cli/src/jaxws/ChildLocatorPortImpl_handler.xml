@@ -20,9 +20,9 @@
 			<handler-class>com.ist.sirs.child_locator.handlers.CertClientHandler
 			</handler-class>
 		</handler>
-		<handler>
-		<handler-class>com.ist.sirs.child_locator.handlers.LoggingHandler
-		</handler-class>
-		</handler>
+<!-- 		<handler> -->
+<!-- 		<handler-class>com.ist.sirs.child_locator.handlers.LoggingHandler -->
+<!-- 		</handler-class> -->
+<!-- 		</handler> -->
 	</handler-chain>
 </handler-chains>

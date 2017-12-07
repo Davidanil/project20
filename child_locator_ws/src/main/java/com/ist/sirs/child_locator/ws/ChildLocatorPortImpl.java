@@ -93,11 +93,19 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		if (isPhoneNumber(phoneNumber) && isEmail(email) && isPassword(password)) {
 			// salt and hash password
 			String salt = db.getSalt(phoneNumber);
+			
+			//number doesnt exist in the database
+			if(salt == null || salt.length() == 0)
+				throwInvalidPhoneNumber("Invalid Login.");
+			
 			byte[] hashedPassword = hashPassword(password, ToByteArray(salt));
+			
 			
 			String loginCode = generateNonce();
 			if(db.login(phoneNumber, email, toHexString(hashedPassword), loginCode))
-				return loginCode;
+				if (!db.isVerified(phoneNumber))
+					return loginCode;
+				return "";
 		}
 
 		return null;
@@ -363,7 +371,9 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 
 	/** Helper method to throw new InvalidTimeException exception */
 	private void throwInvalidPhoneNumber() throws InvalidPhoneNumber_Exception {
-		String message = "Invalid phone number. It must have 9 digits.";
+		throwInvalidPhoneNumber("Invalid phone number. It must have 9 digits.");
+	}
+	private void throwInvalidPhoneNumber(String message) throws InvalidPhoneNumber_Exception {
 		InvalidPhoneNumber faultInfo = new InvalidPhoneNumber();
 		faultInfo.setMessage(message);
 		throw new InvalidPhoneNumber_Exception(message, faultInfo);

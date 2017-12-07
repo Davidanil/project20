@@ -71,19 +71,20 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		byte[] keyBytes = null;
 		PublicKey publickey = null;
 		Cipher cipher = null;
-		if(keys.get(phoneNumber) != null) //number already exists
-			return null;
 		try {
 			// decode public key from string
 			publickey = KeyFactory.getInstance("RSA").generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(publicKey)));
 			// generate Symmetric key
-			secretKey = KeyGenerator.getInstance("AES").generateKey();
+			secretKey = keys.get(phoneNumber);
+			if(secretKey == null){ // if the key is not in the map, create one
+				secretKey = KeyGenerator.getInstance("AES").generateKey();
+				keys.put(phoneNumber, secretKey);
+			}
 			//encrypt Symmetric key
 			cipher = Cipher.getInstance("RSA");
 	        cipher.init(Cipher.PUBLIC_KEY, publickey);
 	        keyBytes = cipher.doFinal(secretKey.getEncoded());
 		} catch (Exception e) { System.out.println(e);}
-		keys.put(phoneNumber, secretKey); // add key to hash map
 		return Base64.getEncoder().encodeToString(keyBytes);
 	}
 

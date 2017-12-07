@@ -38,6 +38,8 @@ public class ChildLocatorClientApp {
 
 		// Create client
 		client = new ChildLocatorClient(wsURL);
+		
+		//SymKey = createChannel("123456789");
 
 		// System.out.println(client.print());
 		// System.out.println(client.login("sheldon","bazinga"));
@@ -626,6 +628,24 @@ public class ChildLocatorClientApp {
 
 	public static void removeFollowee() {
 
+	}
+	
+	public static SecretKey createChannel(String phoneNumber){
+		KeyPair pair = null;
+		byte[] encryptedBytes = null;
+		Cipher cipher = null;
+		try {
+			pair = KeyPairGenerator.getInstance("RSA").generateKeyPair();
+			encryptedBytes = Base64.getDecoder().decode( client.createChannel(phoneNumber, Base64.getEncoder().encodeToString(pair.getPublic().getEncoded())));
+			cipher = Cipher.getInstance("RSA");
+	        cipher.init(Cipher.PRIVATE_KEY, pair.getPrivate());
+
+	        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+	        System.out.println(Base64.getEncoder().encodeToString(decryptedBytes));
+	        return new SecretKeySpec(decryptedBytes, "AES");
+		}catch (Exception e) {System.out.println(e);}
+		
+		return null;
 	}
 
 	// ----------- AUX FUNCTIONS -----------

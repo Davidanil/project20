@@ -314,13 +314,9 @@ public class ChildLocatorClientApp {
 			String[] cmds = { "/bin/sh", "-c", "echo '[SMS]\nLogin Code: " + loginCode + "' | open -f" };
 			Process p = Runtime.getRuntime().exec(cmds);
 			p.waitFor();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (IOException | InterruptedException e) {
+			System.out.println("[Confirm Login] Exception: " + e.getMessage());
+		} 
 
 		while (loop) {
 			try {
@@ -387,12 +383,8 @@ public class ChildLocatorClientApp {
 			String[] cmds = { "/bin/sh", "-c", "echo '[SMS]\nRegistration Code: " + registerCode + "' | open -f" };
 			Process p = Runtime.getRuntime().exec(cmds);
 			p.waitFor();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (IOException | InterruptedException e) {
+			System.out.println("[Confirm Registration] Exception: " + e.getMessage());
 		}
 
 		while (loop) {

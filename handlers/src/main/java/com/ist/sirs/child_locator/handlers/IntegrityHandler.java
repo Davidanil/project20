@@ -106,7 +106,7 @@ public class IntegrityHandler implements SOAPHandler<SOAPMessageContext> {
 	}
 	
 	private void AddHeader(SOAPMessageContext smc, String hash){ // Add hash header to message
-		System.out.println("Adding message hash.");
+		//System.out.println("Adding message hash.");
 		
 		// get SOAP envelope
 		SOAPMessage msg = smc.getMessage();

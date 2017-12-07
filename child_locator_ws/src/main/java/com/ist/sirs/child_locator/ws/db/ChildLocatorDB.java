@@ -82,8 +82,8 @@ public class ChildLocatorDB {
 		}
 	}
 
-	public String getCoodinates(String phoneDad, String phoneSon) {
-		if (!isConnected(phoneDad, phoneSon))
+	public String getCoordinates(String phoneDad, String phoneSon) {
+		if (!isConnected(phoneSon, phoneDad))
 			return null;
 
 		String latitude = null;
@@ -93,9 +93,9 @@ public class ChildLocatorDB {
 
 		try {
 			PreparedStatement stmt2 = connection
-					.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE followeePhone=?");
+					.prepareStatement("SELECT latitude, longitude, timestamp FROM position WHERE phone=?");
 			stmt2.setString(1, phoneSon);
-			stmt2.executeUpdate();
+			rs = stmt2.executeQuery();
 
 			while (rs.next()) {
 				latitude = rs.getString("latitude");
@@ -399,7 +399,6 @@ public class ChildLocatorDB {
 
 			// update connected to 1
 			if (hasNext) {
-				System.out.println("ADD FOLLOWEE NONCE MATCHING");
 				PreparedStatement stmt1 = connection.prepareStatement(
 						"UPDATE connected SET connected=1 WHERE followeePhone=? AND followerPhone=? AND nonce=?");
 				stmt1.setString(1, followeePhoneNumber);

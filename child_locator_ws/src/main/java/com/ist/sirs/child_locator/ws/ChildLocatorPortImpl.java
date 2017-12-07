@@ -213,7 +213,7 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 	}
 	
 	public String getCoordinates(String phoneDad, String phoneSon) {
-		return db.getCoodinates(phoneDad, phoneSon);
+		return db.getCoordinates(phoneDad, phoneSon);
 	}
 
 	// --------------- AUX METHODS -----------------

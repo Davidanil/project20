@@ -539,9 +539,20 @@ public class ChildLocatorClientApp {
 
 	public static void checkFollowee(String phoneSon) throws IOException {
 		clearScreen();
-		String info = client.getCoordinates(getPhoneNumber(), phoneSon);
-		System.out.println(info);
+		System.out.println("[CHECK FOLLOWEE]");
+		System.out.println("Press enter to go to Main Menu");
+		
+		final String phone = phoneSon;
+		java.util.Timer timer = new java.util.Timer();
+		timer.schedule(new TimerTask() {
+		            @Override
+		            public void run() {
+		            	String info = client.getCoordinates(getPhoneNumber(), phone);
+		        		System.out.println(info);
+		            }}, 0, MESSAGE_TIME);
+		
 		System.in.read();
+		mainMenu();
 	}
 
 	public static void addFollower() {

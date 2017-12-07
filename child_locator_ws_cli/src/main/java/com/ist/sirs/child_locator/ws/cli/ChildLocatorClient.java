@@ -88,6 +88,11 @@ public class ChildLocatorClient implements ChildLocatorPortType{
 	}
 	
 	@Override
+	public String createChannel(String phoneNumber, String publicKey) throws InvalidPhoneNumber_Exception, ConnectionAlreadyExists_Exception{
+		return port.createChannel(phoneNumber, publicKey);
+	}
+	
+	@Override
 	public List<FolloweeView> getFollowees(){
 		return port.getFollowees();
 	}

@@ -3,43 +3,43 @@ package com.ist.sirs.child_locator.ws.cli;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.swing.plaf.synth.SynthSeparatorUI;
+import javax.crypto.Cipher;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import java.util.TimerTask;
 
 import com.ist.sirs.child_locator.ws.FolloweeView;
-import com.ist.sirs.child_locator.ws.InvalidEmail_Exception;
-import com.ist.sirs.child_locator.ws.InvalidLoginTime_Exception;
-import com.ist.sirs.child_locator.ws.InvalidPassword_Exception;
-import com.ist.sirs.child_locator.ws.InvalidPhoneNumber_Exception;
-import com.sun.xml.fastinfoset.sax.SystemIdResolver;
-import com.ist.sirs.child_locator.ws.ConnectionAlreadyExists_Exception;
 
 public class ChildLocatorClientApp {
 	public static ChildLocatorClient client = null;
+	
+	public static final int MESSAGE_TIME = 5000;
 
 	public static void main(String args[]) {
 
 		String wsURL = args[0];
-
+		SecretKey SymKey = null;
+		
 		// Create client
 		client = new ChildLocatorClient(wsURL);
 		
-		//SymKey = createChannel("123456789");
+		SymKey = createChannel("123456789");
 
 		// System.out.println(client.print());
 		// System.out.println(client.login("sheldon","bazinga"));
@@ -58,7 +58,7 @@ public class ChildLocatorClientApp {
 		        		double latitude = fixedLatitude;
 		        		double longitude = fixedLongitude;
 		        		fixedLatitude += 0.0000050 ;
-		        		sendCoordinates(phone, latitude, longitude);}}, 0, 1000);
+		        		sendCoordinates(phone, latitude, longitude);}}, 0, MESSAGE_TIME);
 		
 		if (!(new File("src/main/resources/pin")).isFile())
 			createPin();
@@ -641,10 +641,8 @@ public class ChildLocatorClientApp {
 	        cipher.init(Cipher.PRIVATE_KEY, pair.getPrivate());
 
 	        byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
-	        System.out.println(Base64.getEncoder().encodeToString(decryptedBytes));
 	        return new SecretKeySpec(decryptedBytes, "AES");
 		}catch (Exception e) {System.out.println(e);}
-		
 		return null;
 	}
 

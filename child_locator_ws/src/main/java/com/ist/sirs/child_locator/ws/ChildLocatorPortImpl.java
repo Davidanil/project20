@@ -1,19 +1,24 @@
 package com.ist.sirs.child_locator.ws;
 
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.X509EncodedKeySpec;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.jws.HandlerChain;
@@ -66,7 +71,6 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 		byte[] keyBytes = null;
 		PublicKey publickey = null;
 		Cipher cipher = null;
-		System.out.println("begin");
 		if(keys.get(phoneNumber) != null) //number already exists
 			return null;
 		try {
@@ -77,7 +81,6 @@ public class ChildLocatorPortImpl implements ChildLocatorPortType {
 			//encrypt Symmetric key
 			cipher = Cipher.getInstance("RSA");
 	        cipher.init(Cipher.PUBLIC_KEY, publickey);
-	        System.out.println(Base64.getEncoder().encodeToString(secretKey.getEncoded()));
 	        keyBytes = cipher.doFinal(secretKey.getEncoded());
 		} catch (Exception e) { System.out.println(e);}
 		keys.put(phoneNumber, secretKey); // add key to hash map

@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `childdb`.`login` (
   `attempts` TINYINT(16) NULL DEFAULT '0',
   `verified` TINYINT(1) NULL DEFAULT '0',
   `lastlogin` TIMESTAMP NULL DEFAULT now(),
-  `registercode` VARCHAR (15) DEFAULT NULL, 
+  `loginregistercode` VARCHAR (15) DEFAULT NULL, 
   PRIMARY KEY (`phone`),
   UNIQUE INDEX `username_UNIQUE` (`phone` ASC),
   UNIQUE INDEX `salt_UNIQUE` (`salt` ASC))

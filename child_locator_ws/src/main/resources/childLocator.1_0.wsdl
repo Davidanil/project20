@@ -29,6 +29,8 @@
 			<xs:element name="getFollowersResponse" type="tns:getFollowersResponse" />
 			<xs:element name="getAddNonce" type="tns:getAddNonce" />
 			<xs:element name="getAddNonceResponse" type="tns:getAddNonceResponse" />
+			<xs:element name="createChannel" type="tns:createChannel" />
+			<xs:element name="createChannelResponse" type="tns:createChannelResponse" />
 			<xs:element name="addFollowee" type="tns:addFollowee" />
 			<xs:element name="addFolloweeResponse" type="tns:addFolloweeResponse" />
 			
@@ -140,6 +142,18 @@
 			<xs:complexType name="getAddNonceResponse">
 				<xs:sequence>
 					<xs:element name="return" type="xs:string" minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			
+			<xs:complexType name="createChannel">
+				<xs:sequence>
+					<xs:element name="phoneNumber" type="xs:string"	minOccurs="0" />
+					<xs:element name="publicKey"   type="xs:string"	minOccurs="0" />
+				</xs:sequence>
+			</xs:complexType>
+			<xs:complexType name="createChannelResponse">
+				<xs:sequence>
+					<xs:element name="symKey" type="xs:string" minOccurs="0" />
 				</xs:sequence>
 			</xs:complexType>
 
@@ -280,12 +294,18 @@
 		<part name="getFollowersResponse" element="tns:getFollowersResponse" />
 	</message>
 
-
 	<message name="getAddNonce">
 		<part name="getAddNonce" element="tns:getAddNonce" />
 	</message>
 	<message name="getAddNonceResponse">
 		<part name="getAddNonceResponse" element="tns:getAddNonceResponse" />
+	</message>
+	
+	<message name="createChannel">
+		<part name="createChannel" element="tns:createChannel" />
+	</message>
+	<message name="createChannelResponse">
+		<part name="createChannelResponse" element="tns:createChannelResponse" />
 	</message>
 
 	<message name="addFollowee">
@@ -375,6 +395,14 @@
 			<fault name="ConnectionAlreadyExists" message="tns:ConnectionAlreadyExists" />
 			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
 		</operation>
+		
+		<operation name="createChannel">
+			<input name="createChannel" message="tns:createChannel" />
+			<output name="createChannelResponse" message="tns:createChannelResponse" />
+			<fault name="ConnectionAlreadyExists" message="tns:ConnectionAlreadyExists" />
+			<fault name="InvalidPhoneNumber" message="tns:InvalidPhoneNumber" />
+		</operation>
+		
 		<operation name="addFollowee">
 			<input name="addFollowee" message="tns:addFollowee" />
 			<output name="addFolloweeResponse" message="tns:addFolloweeResponse" />
@@ -486,6 +514,22 @@
 		</operation>
 
 		<operation name="getAddNonce">
+			<soap:operation soapAction="" />
+			<input>
+				<soap:body use="literal" />
+			</input>
+			<output>
+				<soap:body use="literal" />
+			</output>
+			<fault name="ConnectionAlreadyExists">
+				<soap:fault name="ConnectionAlreadyExists" use="literal" />
+			</fault>
+			<fault name="InvalidPhoneNumber">
+				<soap:fault name="InvalidPhoneNumber" use="literal" />
+			</fault>
+		</operation>
+		
+		<operation name="createChannel">
 			<soap:operation soapAction="" />
 			<input>
 				<soap:body use="literal" />
